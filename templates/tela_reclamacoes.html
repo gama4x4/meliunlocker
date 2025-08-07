@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Reclamações{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">16. Reclamações</h1>
+
+<!-- Card principal -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-shield-exclamation-fill me-2"></i><strong>Gerenciador de Reclamações e Devoluções</strong>
+    </div>
+    <div class="card-body">
+
+        <!-- Controles e Filtros -->
+        <div class="d-flex flex-wrap gap-3 p-3 border rounded mb-4 bg-light">
+            <div>
+                <label for="reclamacoesConta" class="form-label">Conta:</label>
+                <select id="reclamacoesConta" class="form-select">
+                    <option selected>Todas as Contas</option>
+                </select>
+            </div>
+            <div>
+                <label for="reclamacoesStatus" class="form-label">Status:</label>
+                <select id="reclamacoesStatus" class="form-select">
+                    <option selected>opened (Abertas)</option>
+                    <option>closed (Fechadas)</option>
+                </select>
+            </div>
+            <div class="align-self-end">
+                <button class="btn btn-primary"><i class="bi bi-search me-1"></i>Buscar Reclamações</button>
+            </div>
+        </div>
+
+        <!-- Layout de Dois Painéis -->
+        <div class="row">
+            <!-- Painel da Esquerda: Lista de Reclamações -->
+            <div class="col-lg-5">
+                <h6>Reclamações Encontradas</h6>
+                <div class="list-group" style="max-height: 600px; overflow-y: auto;">
+                    <!-- Exemplo de uma reclamação ativa/selecionada -->
+                    <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Produto com defeito</h6>
+                            <small>Hoje</small>
+                        </div>
+                        <p class="mb-1 text-truncate">Pedido: 123456789</p>
+                        <small class="text-muted">ID Reclamação: 987654321</small>
+                    </a>
+                    <!-- Exemplo de outra reclamação -->
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Recebi algo diferente</h6>
+                            <small class="text-muted">Ontem</small>
+                        </div>
+                        <p class="mb-1 text-truncate">Envio: 456789123</p>
+                        <small class="text-muted">ID Reclamação: 321654987</small>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Painel da Direita: Detalhes e Mensagens da Reclamação -->
+            <div class="col-lg-7">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <strong>Detalhes e Mensagens da Reclamação</strong>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        
+                        <!-- Detalhes da Reclamação -->
+                        <div class="mb-3">
+                            <h6 class="card-title">Detalhes da Reclamação</h6>
+                            <ul class="list-unstyled small">
+                                <li><strong>Produto:</strong> Produto Exemplo ABC</li>
+                                <li><strong>ID Reclamação:</strong> 987654321</li>
+                                <li><strong>Status:</strong> opened</li>
+                                <li><strong>Tipo:</strong> claim</li>
+                                <li><strong>Motivo:</strong> Produto com defeito</li>
+                            </ul>
+                        </div>
+
+                        <!-- Histórico de Mensagens -->
+                        <div class="flex-grow-1 p-2 border rounded bg-light" style="overflow-y: auto;">
+                            <p class="text-muted">O histórico de mensagens da reclamação aparecerá aqui...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -889,6 +889,34 @@ def tela_central_promocoes():
 def tela_produtos_tiny():
     return render_template('tela_produtos_tiny.html')
 
+# Dentro de app.py
+
+@app.route('/monitor-concorrencia')
+@login_required
+def tela_monitor_concorrencia():
+    return render_template('tela_monitor_concorrencia.html')
+
+# Dentro de app.py
+
+@app.route('/perguntas')
+@login_required
+def tela_perguntas():
+    return render_template('tela_perguntas.html')
+
+# Dentro de app.py
+
+@app.route('/mensagens')
+@login_required
+def tela_mensagens():
+    return render_template('tela_mensagens.html')
+
+# Dentro de app.py
+
+@app.route('/reclamacoes')
+@login_required
+def tela_reclamacoes():
+    return render_template('tela_reclamacoes.html')
+
 # --- Bloco Principal de Execução ---
 if __name__ == '__main__':
     # Cria a pasta 'config' se não existir, ANTES de tentar usá-la

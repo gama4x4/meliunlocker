@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Perguntas (Pré-Venda){% endblock %}
+
+{% block content %}
+<h1 class="mb-4">14. Perguntas (Pré-Venda)</h1>
+
+<!-- Card principal -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-patch-question-fill me-2"></i><strong>Gerenciador de Perguntas</strong>
+    </div>
+    <div class="card-body">
+
+        <!-- Controles e Filtros -->
+        <div class="d-flex flex-wrap gap-3 p-3 border rounded mb-4 bg-light">
+            <div>
+                <label for="perguntasConta" class="form-label">Conta:</label>
+                <select id="perguntasConta" class="form-select">
+                    <option selected>Todas as Contas</option>
+                </select>
+            </div>
+            <div>
+                <label for="perguntasStatus" class="form-label">Status:</label>
+                <select id="perguntasStatus" class="form-select">
+                    <option selected>UNANSWERED (Não Respondidas)</option>
+                    <option>ANSWERED (Respondidas)</option>
+                    <option>BANNED (Banidas)</option>
+                </select>
+            </div>
+            <div class="align-self-end">
+                <button class="btn btn-primary"><i class="bi bi-search me-1"></i>Buscar Perguntas</button>
+            </div>
+        </div>
+
+        <!-- Layout de Dois Painéis -->
+        <div class="row">
+            <!-- Painel da Esquerda: Lista de Perguntas -->
+            <div class="col-lg-5">
+                <h6>Perguntas Recebidas</h6>
+                <div class="list-group" style="max-height: 600px; overflow-y: auto;">
+                    <!-- Exemplo de uma pergunta ativa/selecionada -->
+                    <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1 text-truncate" style="max-width: 250px;">Produto Exemplo ABC</h6>
+                            <small>Hoje</small>
+                        </div>
+                        <p class="mb-1 text-truncate">Olá, boa noite! Este produto é compatível com o modelo XYZ?</p>
+                        <small class="text-muted">Anúncio: MLB12345678</small>
+                    </a>
+                    <!-- Exemplo de outra pergunta -->
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1 text-truncate" style="max-width: 250px;">Outro Produto Legal</h6>
+                            <small class="text-muted">Ontem</small>
+                        </div>
+                        <p class="mb-1 text-truncate">Tem a pronta entrega? Se eu comprar agora, envia quando?</p>
+                        <small class="text-muted">Anúncio: MLB98765432</small>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Painel da Direita: Detalhes e Resposta -->
+            <div class="col-lg-7">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <strong>Conversa e Resposta</strong>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6 class="card-title">Anúncio: <a href="#">Produto Exemplo ABC</a></h6>
+                        </div>
+                        
+                        <!-- Histórico da Conversa -->
+                        <div class="mb-3 p-2 border rounded bg-light" style="max-height: 300px; overflow-y: auto;">
+                            <div class="mb-2">
+                                <p class="mb-0 small"><strong>Comprador</strong> <span class="text-muted">(24/05 20:15)</span></p>
+                                <p class="mb-1">Este produto serve no modelo 2010?</p>
+                            </div>
+                            <div class="mb-2 text-end">
+                                <p class="mb-0 small"><span class="text-muted">(24/05 20:20)</span> <strong>Você</strong></p>
+                                <p class="mb-1">Olá! Sim, serve perfeitamente no modelo 2010. Aguardamos sua compra!</p>
+                            </div>
+                             <div class="mb-2">
+                                <p class="mb-0 small"><strong>Comprador</strong> <span class="text-muted">(Hoje 10:30)</span></p>
+                                <p class="mb-1">Olá, boa noite! Este produto é compatível com o modelo XYZ?</p>
+                            </div>
+                        </div>
+
+                        <!-- Área de Resposta -->
+                        <div>
+                            <label for="answerText" class="form-label fw-bold">Sua Resposta:</label>
+                            <textarea id="answerText" class="form-control" rows="5"></textarea>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-end gap-2">
+                         <button class="btn btn-sm btn-outline-danger" type="button">Excluir Pergunta</button>
+                         <button class="btn btn-success" type="button"><i class="bi bi-send-fill me-2"></i>Enviar Resposta</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
