@@ -1,0 +1,11 @@
+{
+  "GAMALOBOCOMERCIODEPECASLT": {
+    "nickname": "GAMALOBOCOMERCIODEPECASLT",
+    "access_token": "APP_USR-3574022221088825-080610-1a09881f815b3c9fc852a9c7c3cf6830-703360332",
+    "refresh_token": "TG-689365a96fd59400018a00e0-703360332",
+    "expires_at": 1754511881.50276,
+    "seller_id": "703360332",
+    "user_id_from_token": "703360332",
+    "shipping_mode": "me2"
+  }
+}

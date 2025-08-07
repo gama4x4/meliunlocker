@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Publicador Avançado</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+</head>
+<body>
+    <div class="app-container">
+        <nav class="sidebar">
+			<div class="sidebar-header">
+				<img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="sidebar-logo">
+				<span>Publicador</span>
+			</div>
+            <ul class="menu-list">
+                <li><a href="#" class="menu-item active" data-tab="tabProduto"><i class="fas fa-box-open icon"></i>Produto & SKU</a></li>
+                <li><a href="#" class="menu-item" data-tab="tabImagens"><i class="fas fa-images icon"></i>Imagens</a></li>
+                <li><a href="#" class="menu-item" data-tab="tabFicha"><i class="fas fa-file-alt icon"></i>Ficha & Descrição</a></li>
+                <li><a href="#" class="menu-item" data-tab="tabPrecos"><i class="fas fa-dollar-sign icon"></i>Preços & Publicar</a></li>
+                <li><a href="#" class="menu-item" data-tab="tabAtualizar"><i class="fas fa-sync-alt icon"></i>Atualizar Anúncios</a></li>
+                <li><a href="#" class="menu-item" data-tab="tabReplicador"><i class="fas fa-copy icon"></i>Replicador</a></li>
+                <li><a href="#" class="menu-item" data-tab="tabCompatibilidade"><i class="fas fa-car-side icon"></i>Compatibilidade</a></li>
+                <li><a href="#" class="menu-item" data-tab="tabPausados"><i class="fas fa-pause-circle icon"></i>Anúncios Pausados</a></li>
+                <hr class="menu-divider">
+                <li><a href="#" class="menu-item" data-tab="tabConfiguracoes"><i class="fas fa-cogs icon"></i>Configurações API</a></li>
+                <li><a href="#" class="menu-item" data-tab="tabContasML"><i class="fas fa-users-cog icon"></i>Contas Mercado Livre</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <i class="fas fa-user-circle icon"></i> {{ username }}
+                </div>
+                <a href="{{ url_for('logout_route') }}" class="logout-button"><i class="fas fa-sign-out-alt icon"></i>Sair</a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <header class="main-header">
+                <h1 id="pageTitle">Produto & SKU</h1>
+                <div id="globalStatus" class="global-status"><i class="fas fa-plug"></i> Nenhuma conta ML ativa.</div>
+            </header>
+
+            <div class="tabs-content-wrapper">
+                <div id="tabProduto" class="tab-pane active">
+                    <h2><i class="fas fa-box-open icon"></i> Produto & SKU (Tiny & ML)</h2>
+                    <div class="form-section">
+                        <h3><i class="fas fa-store icon"></i> Buscar Produto no Tiny ERP</h3>
+                        <div class="form-row">
+                            <div class="form-group half-width">
+                                <label for="tinySkuInput">Buscar por Código (SKU) Tiny:</label>
+                                <input type="text" id="tinySkuInput" placeholder="Ex: MEU_SKU_123">
+                            </div>
+                            <div class="form-group half-width">
+                                <label for="tinyIdInput">ou por ID numérico Tiny:</label>
+                                <input type="text" id="tinyIdInput" placeholder="Ex: 12345">
+                            </div>
+                        </div>
+                        <button id="fetchTinyProductBtn" class="button-primary"><i class="fas fa-search"></i> Buscar Produto no Tiny</button>
+                        <div id="tinyProductStatus" class="status-message" style="margin-top:10px;"></div>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <div class="form-section">
+                        <h3><i class="fab fa-buffer"></i> Detalhes do Anúncio (para Mercado Livre)</h3>
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="mlTitleInput">Título Anúncio ML (máx. 60):</label>
+                                <input type="text" id="mlTitleInput" maxlength="60">
+                                <small id="mlTitleCharCount">0/60</small>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group half-width">
+                                <label for="mlQuantityInput">Quantidade (Estoque ML):</label>
+                                <input type="number" id="mlQuantityInput" min="0" value="0">
+                            </div>
+                            <div class="form-group half-width">
+                                <label for="mlSellerSkuInput">Seu SKU (Seller SKU no ML):</label>
+                                <input type="text" id="mlSellerSkuInput" placeholder="SKU que aparecerá no ML">
+                            </div>
+                        </div>
+                         <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="mlCategoryDisplay">Categoria ML:</label>
+                                <div class="category-container">
+                                    <input type="text" id="mlCategoryDisplay" readonly placeholder="Nenhuma categoria selecionada">
+                                    <input type="hidden" id="mlCategoryIdHidden">
+                                    <button id="suggestMlCategoryBtn" class="button-secondary" title="Sugerir categoria com base no título"><i class="fas fa-lightbulb"></i> Sugerir</button>
+                                    <button id="browseMlCategoryBtn" class="button-secondary" title="Buscar categoria manualmente"><i class="fas fa-folder-open"></i> Buscar...</button>
+                                </div>
+                                <div id="mlCategorySuggestionArea" style="margin-top: 5px; min-height: 20px;">
+                                    <!-- Sugestões de categoria aparecerão aqui -->
+                                </div>
+                                <div id="mlCategoryStatus" class="status-message" style="margin-top:5px;"></div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group half-width">
+                                <label for="mlHandlingTimeInput">Tempo de Manuseio/Fabricação (dias):</label>
+                                <input type="text" id="mlHandlingTimeInput" placeholder="Ex: 3 ou 0 para remover">
+                            </div>
+                            <div class="form-group half-width checkbox-group">
+                                <input type="checkbox" id="mlLocalPickupCheckbox" class="styled-checkbox">
+                                <label for="mlLocalPickupCheckbox" class="checkbox-label">Permitir Retirada no Local?</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3><i class="fas fa-barcode icon"></i> Status do SKU nas Contas ML</h3>
+                        <div id="mlSkuCheckResultsArea">
+                            <p>Após buscar um produto no Tiny e preencher o "Seu SKU (ML)", os resultados da verificação aparecerão aqui.</p>
+                        </div>
+                    </div>
+                </div>
+
+<!-- backend/templates/dashboard.html -->
+<!-- ... (código HTML existente) ... -->
+
+                <div id="tabImagens" class="tab-pane">
+                    <h2><i class="fas fa-images icon"></i> Gerenciador de Imagens (Máx. 12)</h2>
+
+                    <div class="form-section">
+                        <h3><i class="fas fa-plus-square"></i> Adicionar Nova Imagem</h3>
+                        <div class="form-row align-items-end"> <!-- Adicionado align-items-end para alinhar botão -->
+                            <div class="form-group" style="flex-grow: 3;"> <!-- Input de URL ocupa mais espaço -->
+                                <label for="newImageUrlInput">Nova URL de Imagem:</label>
+                                <input type="url" id="newImageUrlInput" placeholder="https://exemplo.com/imagem.jpg">
+                            </div>
+                            <div class="form-group" style="flex-grow: 1;">
+                                <!-- Label vazio para alinhar ou pode ser removido se o botão tiver margin-top -->
+                                <label> </label>
+                                <button id="addImageUrlBtn" class="button-secondary" style="width: 100%;"><i class="fas fa-plus"></i> Adicionar URL</button>
+                            </div>
+                        </div>
+                        <div id="imageAddStatus" class="status-message" style="margin-top:5px;"></div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3><i class="fas fa-tasks"></i> Imagens do Anúncio</h3>
+                        <div class="image-actions-toolbar" style="margin-bottom: 15px;">
+                            <button id="optimizeFirstImageBtn" class="button-secondary btn-small" title="Otimizar primeira imagem para 1000x1000px com fundo branco e hospedar."><i class="fas fa-compress-alt"></i> Otimizar 1ª</button>
+                            <button id="removeBgFirstImageBtn" class="button-secondary btn-small" title="Remover fundo da primeira imagem (requer chave Remove.bg e Imgur)"><i class="fas fa-magic"></i> Rem. Fundo 1ª</button>
+                            <span id="removeBgCreditsTabImagens" class="api-status-text" style="margin-left: 15px;"></span>
+                        </div>
+                        <div id="imagePreviewContainer" class="image-preview-container">
+                            <p>Nenhuma imagem carregada ou adicionada.</p>
+                            <!-- Imagens serão renderizadas aqui pelo JS -->
+                        </div>
+                    </div>
+                </div>
+
+<!-- ... (resto do dashboard.html) ... -->
+<!-- backend/templates/dashboard.html -->
+<!-- ... (código HTML existente para outras abas) ... -->
+
+                <div id="tabFicha" class="tab-pane">
+                    <h2><i class="fas fa-file-alt icon"></i> Ficha Técnica & Descrição</h2>
+
+                    <!-- Seção Descrição do Produto -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-align-left icon"></i> Descrição Detalhada do Anúncio (ML)</h3>
+                        <div class="description-toolbar" style="margin-bottom: 10px;">
+                            <button id="generateDescChatGptBtn" class="button-secondary btn-small">
+                                <i class="fas fa-magic"></i> Gerar com IA (ChatGPT)
+                            </button>
+                            <!-- Outros botões de formatação de texto podem ser adicionados aqui se desejar um editor mais rico -->
+                        </div>
+                        <textarea id="mlDescriptionTextarea" rows="15" placeholder="Digite ou gere a descrição do seu anúncio aqui. Pode usar HTML simples (p, br, b, i, ul, li)."></textarea>
+                        <div id="descriptionStatus" class="status-message" style="margin-top:5px;"></div>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <!-- Seção Ficha Técnica (Atributos ML) -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-list-alt icon"></i> Ficha Técnica (Atributos da Categoria ML)</h3>
+                        <div id="mlAttributesContainer">
+                            <p>Selecione uma categoria na Aba "Produto & SKU" para carregar os atributos correspondentes.</p>
+                            <!-- Atributos serão renderizados aqui pelo JS -->
+                        </div>
+                        <div id="attributesStatus" class="status-message" style="margin-top:10px;"></div>
+                    </div>
+                </div>
+
+<!-- ... (resto do dashboard.html) ... -->
+<!-- backend/templates/dashboard.html -->
+<!-- ... (código HTML existente para outras abas) ... -->
+
+                <div id="tabPrecos" class="tab-pane">
+                    <h2><i class="fas fa-dollar-sign icon"></i> Calculadora de Preços & Publicar no Mercado Livre</h2>
+
+                    <!-- Seção de Cálculo de Preço -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-calculator"></i> 1. Calcular Preços de Venda</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="priceCalcCustoInput">Preço de Custo do Produto (R$):</label>
+                                <input type="number" id="priceCalcCustoInput" placeholder="Ex: 50.00" step="0.01" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="priceCalcLucroInput">Lucro Desejado (R$ ou %):</label>
+                                <div class="input-with-addon">
+                                    <input type="number" id="priceCalcLucroInput" placeholder="Ex: 25.00 ou 50" step="0.01" min="0">
+                                    <select id="priceCalcLucroTipo">
+                                        <option value="REAIS" selected>R$</option>
+                                        <option value="PERCENT">%</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="priceCalcCepOrigemInput">CEP de Origem (para Frete):</label>
+                                <input type="text" id="priceCalcCepOrigemInput" placeholder="Ex: 01000000" maxlength="8">
+                            </div>
+                        </div>
+                        <h4>Dimensões do Pacote (para cálculo de frete):</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="priceCalcAlturaInput">Altura (cm):</label>
+                                <input type="number" id="priceCalcAlturaInput" placeholder="Ex: 10" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="priceCalcLarguraInput">Largura (cm):</label>
+                                <input type="number" id="priceCalcLarguraInput" placeholder="Ex: 15" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="priceCalcComprimentoInput">Comprimento (cm):</label>
+                                <input type="number" id="priceCalcComprimentoInput" placeholder="Ex: 20" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="priceCalcPesoInput">Peso (kg):</label>
+                                <input type="number" id="priceCalcPesoInput" placeholder="Ex: 0.5" step="0.001" min="0.001">
+                            </div>
+                        </div>
+                        <h4>Opções de Precificação:</h4>
+                        <div class="checkbox-group-stacked">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="priceCalcDesconto10Checkbox" class="styled-checkbox">
+                                <label for="priceCalcDesconto10Checkbox" class="checkbox-label">Aplicar Desconto de 10% sobre o Custo?</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="priceCalcTaxaAntecipacaoCheckbox" class="styled-checkbox">
+                                <label for="priceCalcTaxaAntecipacaoCheckbox" class="checkbox-label">Incluir Taxa de Antecipação (ex: 3.8%)?</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="priceCalcFreteGratisCheckbox" class="styled-checkbox">
+                                <label for="priceCalcFreteGratisCheckbox" class="checkbox-label">Oferecer Frete Grátis (Mercado Envios)?</label>
+                            </div>
+                        </div>
+                        <button id="calculatePricesBtn" class="button-primary" style="margin-top: 20px;"><i class="fas fa-calculator"></i> Calcular Preços para Contas Selecionadas</button>
+                        <div id="priceCalcStatus" class="status-message" style="margin-top:10px;"></div>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <!-- Seção de Resultados do Cálculo de Preço -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-tags"></i> 2. Resultados dos Preços por Conta e Tipo de Anúncio</h3>
+                        <div id="priceResultsContainer" class="price-results-container">
+                            <p>Os preços calculados para as contas selecionadas aparecerão aqui.</p>
+                        </div>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <!-- Seção de Publicação -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-upload"></i> 3. Publicar Anúncios</h3>
+                        <div class="form-group">
+                            <label>Selecione as contas ML para publicar:</label>
+                            <div id="publishMlAccountsCheckboxes" class="checkbox-columns">
+                                <p>Carregando contas...</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipos de Anúncio a Criar:</label>
+                            <div class="checkbox-columns">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="publishClassicCheckbox" class="styled-checkbox" checked>
+                                    <label for="publishClassicCheckbox" class="checkbox-label">Clássico (gold_special)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="publishPremiumCheckbox" class="styled-checkbox" checked>
+                                    <label for="publishPremiumCheckbox" class="checkbox-label">Premium (gold_pro)</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="publishCompatProfileSelect">Aplicar Perfil de Compatibilidade (Opcional):</label>
+                            <div class="category-container"> <!-- Reutilizando para layout -->
+                                <select id="publishCompatProfileSelect" style="flex-grow: 1;">
+                                    <option value="">Nenhum Perfil</option>
+                                    <!-- Perfis serão populados pelo JS -->
+                                </select>
+                                <button id="refreshCompatProfilesPublishBtn" class="button-secondary btn-small" title="Atualizar lista de perfis"><i class="fas fa-sync-alt"></i></button>
+                            </div>
+                        </div>
+                        <button id="publishToMlBtn" class="button-primary button-publish" style="width: 100%; padding-top: 15px; padding-bottom: 15px; font-size: 1.1em;">
+                            <i class="fas fa-rocket"></i> PUBLICAR NAS CONTAS E TIPOS SELECIONADOS
+                        </button>
+                        <div id="publishStatus" class="status-message" style="margin-top:15px;"></div>
+                    </div>
+                </div>
+
+<!-- ... (resto do dashboard.html para outras abas e o modal) ... -->
+                <div id="tabAtualizar" class="tab-pane">
+                    <h2><i class="fas fa-sync-alt icon"></i> Atualizar Anúncios Existentes</h2>
+                    <p>Conteúdo da Aba 5 (Atualizar Anúncios) será implementado aqui.</p>
+                </div>
+                 <div id="tabReplicador" class="tab-pane">
+                    <h2><i class="fas fa-copy icon"></i> Replicador de Anúncios</h2>
+                    <p>Conteúdo da Aba 6 (Replicador) será implementado aqui.</p>
+                </div>
+                <div id="tabCompatibilidade" class="tab-pane">
+                    <h2><i class="fas fa-car-side icon"></i> Gerenciador de Compatibilidade (Autopeças)</h2>
+                    <p>Conteúdo da Aba 7 (Compatibilidade) será implementado aqui.</p>
+                </div>
+                <div id="tabPausados" class="tab-pane">
+                    <h2><i class="fas fa-pause-circle icon"></i> Anúncios Pausados</h2>
+                    <p>Conteúdo da Aba 8 (Anúncios Pausados) será implementado aqui.</p>
+                </div>
+                <div id="tabConfiguracoes" class="tab-pane">
+                    <h2><i class="fas fa-cogs icon"></i> Configurações de Chaves API</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="tinyApiTokenInput">Chave API Tiny ERP v2:</label>
+                            <input type="password" id="tinyApiTokenInput" placeholder="Seu token Tiny API v2">
+                        </div>
+                        <div class="form-group">
+                            <label for="removebgApiKeyInput">Chave API Remove.bg:</label>
+                            <input type="password" id="removebgApiKeyInput" placeholder="Sua chave Remove.bg">
+                            <small id="removeBgCredits" class="api-status-text"></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="imgurClientIdInput">Client ID Imgur:</label>
+                            <input type="text" id="imgurClientIdInput" placeholder="Seu Client ID Imgur">
+                        </div>
+                        <div class="form-group">
+                            <label for="chatgptApiKeyInput">Chave API ChatGPT (OpenAI):</label>
+                            <input type="password" id="chatgptApiKeyInput" placeholder="Sua chave OpenAI API">
+                        </div>
+                    </div>
+                    <button id="saveApiConfigsBtn" class="button-primary"><i class="fas fa-save"></i> Salvar Configurações API</button>
+                    <div id="configApiStatus" class="status-message" style="margin-top:15px;"></div>
+                </div>
+                <div id="tabContasML" class="tab-pane">
+                    <h2><i class="fas fa-users-cog icon"></i> Gerenciar Contas Mercado Livre</h2>
+                    <button id="addMLAccountBtn" class="button-primary" style="margin-bottom: 15px;"><i class="fas fa-plus-circle"></i> Adicionar Nova Conta ML</button>
+                    <div id="mlAccountsList">
+                        <p>Carregando contas...</p>
+                    </div>
+                    <div id="mlAccountStatus" class="status-message" style="margin-top:15px;"></div>
+                </div>
+            </div> <!-- Fim de .tabs-content-wrapper -->
+        </main>
+    </div>
+
+    <!-- Modal para Navegação de Categorias ML -->
+	<div id="mlCategoryBrowserModal" class="modal">
+		<div class="modal-content">
+			<span class="close-modal-btn" id="closeCategoryBrowserModal">×</span>
+			<h3><i class="fas fa-sitemap"></i> Buscar Categoria no Mercado Livre</h3>
+			<div class="category-search-container">
+				<input type="text" id="categorySearchInput" placeholder="Busca desabilitada por enquanto." disabled>
+			</div>
+			<div id="categoryTreeArea" class="category-tree">
+				<p id="categoryModalInitialMessage"> <!-- ID AQUI -->
+					Use a busca (desabilitada) ou <a href="#" id="loadRootCategoriesLinkInModal">clique aqui para carregar categorias raiz</a>.
+				</p>
+				<ul id="categoryListUl"></ul>
+			</div>
+			<div id="categoryBrowserStatus" class="status-message info" style="margin-top: 10px;"></div>
+		</div>
+	</div>
+
+	<script type="module" src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

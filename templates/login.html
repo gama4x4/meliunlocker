@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Publicador Avançado</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+</head>
+<body>
+    <div class="login-container">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo Aplicativo" class="login-logo">
+        <h2>Painel Administrativo</h2>
+        {% if error %}
+            <p class="error-message">{{ error }}</p>
+        {% endif %}
+        <!-- CORREÇÃO AQUI -->
+        <form method="post" action="{{ url_for('login_route') }}">
+            <div class="input-group">
+                <label for="username">Usuário:</label>
+                <input type="text" id="username" name="username" value="root@root" required autocomplete="username">
+            </div>
+            <div class="input-group">
+                <label for="password">Senha:</label>
+                <input type="password" id="password" name="password" required autocomplete="current-password">
+            </div>
+            <button type="submit">Entrar</button>
+        </form>
+        <p class="app-version">Publicador Avançado v1.0-Web</p>
+    </div>
+</body>
+</html>

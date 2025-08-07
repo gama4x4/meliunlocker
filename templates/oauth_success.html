@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Autorização Concluída</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/simple_page.css') }}">
+    <!-- Favicon (opcional) -->
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+</head>
+<body>
+    <div class="container">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" style="height: 40px; margin-bottom: 15px;">
+        <h1><i class="fas fa-check-circle" style="color: green;"></i> Autorização Concluída!</h1>
+        <p>A conta Mercado Livre <strong>{{ account_name | e }}</strong> foi vinculada com sucesso.</p>
+        <p>Você pode fechar esta janela agora e retornar à aplicação principal.</p>
+        <p><a href="{{ url_for('dashboard_route') }}">Voltar ao Dashboard</a></p>
+        <script>
+            // Tenta fechar a janela após um tempo, se for um popup
+            setTimeout(function() {
+                if (window.opener && !window.opener.closed) {
+                    // Se foi aberta por window.open, tenta informar o opener
+                    try {
+                        window.opener.focus(); // Foca na janela principal
+                        // window.opener.location.reload(); // Se quiser que a janela principal recarregue
+                    } catch (e) { console.error("Erro ao focar no opener:", e); }
+                }
+                // window.close(); // Isso pode não funcionar em todos os navegadores por segurança
+            }, 3000);
+        </script>
+    </div>
+</body>
+</html>
