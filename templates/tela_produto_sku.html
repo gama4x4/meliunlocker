@@ -128,5 +128,54 @@
     </div>
 </div>
 
+<!-- Card para os Detalhes do Anúncio (MODIFICADO COM NOVOS IDs) -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-card-list me-2"></i><strong>Detalhes do Anúncio (para Mercado Livre)</strong>
+    </div>
+    <div class="card-body">
+        <form>
+            <!-- Título -->
+            <div class="mb-3">
+                <label for="mlTitleInput" class="form-label">Título Anúncio ML (máx. 60):</label>
+                <input type="text" class="form-control" id="mlTitleInput" maxlength="60">
+                <div class="form-text text-end" id="mlTitleCharCount">0/60</div>
+            </div>
+
+            <!-- Quantidade e SKU -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="mlQuantityInput" class="form-label">Quantidade (Estoque ML):</label>
+                    <input type="number" class="form-control" id="mlQuantityInput" value="0">
+                </div>
+                <div class="col-md-6">
+                    <label for="mlSellerSkuInput" class="form-label">Seu SKU (Seller SKU no ML):</label>
+                    <input type="text" class="form-control" id="mlSellerSkuInput" placeholder="SKU que aparecerá no ML">
+                </div>
+            </div>
+
+            <!-- Categoria -->
+            <div class="mb-3">
+                <label for="mlCategoryDisplay" class="form-label">Categoria ML:</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="mlCategoryDisplay" placeholder="Nenhuma categoria selecionada" readonly>
+                    <!-- Adicionados IDs aos botões -->
+                    <button class="btn btn-outline-secondary" type="button" id="suggestMlCategoryBtn">Sugerir</button>
+                    <button class="btn btn-outline-secondary" type="button" id="browseMlCategoryBtn">Buscar...</button>
+                </div>
+                <!-- Input escondido para guardar o ID da categoria -->
+                <input type="hidden" id="mlCategoryIdHidden">
+            </div>
+            
+            <!-- Área para mostrar a sugestão da categoria -->
+            <div id="mlCategorySuggestionArea" class="mb-2"></div>
+            
+            <!-- Status da categoria (Carregando, Erro, etc.) -->
+            <div id="mlCategoryStatus" class="status-message"></div>
+
+        </form>
+    </div>
+</div>
+
 
 {% endblock %}
