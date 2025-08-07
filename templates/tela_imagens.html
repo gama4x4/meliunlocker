@@ -96,4 +96,40 @@
     </div>
 </div>
 
+<!-- Seção Principal de Gerenciamento -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-images me-2"></i><strong>Imagens do Produto Atual (Máx. 12)</strong>
+    </div>
+    <div class="card-body">
+        <!-- Controles Superiores -->
+        <div class="p-3 border rounded mb-4 bg-light">
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-6">
+                    <label for="newImageUrlInput" class="form-label mb-1">Nova URL de Imagem:</label>
+                    <div class="input-group">
+                        <!-- ADICIONADO IDs -->
+                        <input type="text" class="form-control" id="newImageUrlInput" placeholder="https://exemplo.com/imagem.jpg">
+                        <button class="btn btn-primary" type="button" id="addImageUrlBtn" title="Adicionar URL à lista"><i class="bi bi-plus-lg"></i> Adicionar</button>
+                    </div>
+                </div>
+                <div class="col-lg-6 d-flex justify-content-start justify-content-lg-end gap-2">
+                    <!-- ADICIONADO IDs -->
+                    <button class="btn btn-outline-secondary" type="button" id="optimizeFirstImageBtn" title="Otimizar primeira imagem para 1000x1000px"><i class="bi bi-aspect-ratio me-1"></i>Otimizar 1ª</button>
+                    <button class="btn btn-outline-secondary" type="button" id="optimizeAllImagesBtn" title="Otimizar todas as imagens da lista"><i class="bi bi-grid-1x2 me-1"></i>Otimizar Todas</button>
+                    <button class="btn btn-outline-info" type="button" id="removeBgFirstImageBtn" title="Remover fundo da primeira imagem usando Remove.bg"><i class="bi bi-magic me-1"></i>Rem. Fundo</button>
+                </div>
+            </div>
+             <!-- ADICIONADO: Área para status -->
+            <div id="image-status-bar" class="status-message info mt-2" style="display: none;"></div>
+        </div>
+
+        <!-- Container para a Lista de Imagens Atuais -->
+        <div id="image-list-container">
+            <!-- O JavaScript irá gerar o conteúdo aqui -->
+            <p class="text-muted">Nenhuma imagem adicionada.</p>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

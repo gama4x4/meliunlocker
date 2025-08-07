@@ -34,3 +34,51 @@ body {
 .navbar {
     flex-shrink: 0;
 }
+
+/* No final de publicador_web/static/css/style.css */
+
+.category-tree {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.category-tree li {
+    padding: 5px 0 5px 25px;
+    position: relative;
+}
+
+.category-tree li.has-children {
+    cursor: pointer;
+}
+
+.category-tree li.has-children::before {
+    content: '\25B6'; /* Símbolo de seta para a direita (triângulo) */
+    position: absolute;
+    left: 5px;
+    top: 6px;
+    color: #0d6efd;
+    transition: transform 0.2s;
+}
+
+.category-tree li.has-children.open::before {
+    transform: rotate(90deg);
+}
+
+.category-tree li.leaf-node {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.category-tree li.leaf-node:hover {
+    background-color: #e9ecef;
+}
+
+.category-tree li ul {
+    display: none; /* Escondido por padrão */
+    list-style-type: none;
+    padding-left: 15px;
+}
+
+.category-tree li.open > ul {
+    display: block; /* Mostra quando o pai tem a classe 'open' */
+}

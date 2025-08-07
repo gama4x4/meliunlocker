@@ -356,7 +356,16 @@ document.addEventListener('DOMContentLoaded', function () {
         if (mlCategorySuggestionArea) mlCategorySuggestionArea.innerHTML = '';
         if (categoryBrowserModal) categoryBrowserModal.style.display = 'none';
         console.log(`Categoria ML definida: ID=${id}, Nome='${name}'`);
-        loadMlAttributesForCategory(id);
+		// --- ADICIONE ESTA SEÇÃO ---
+		// Dispara um evento personalizado para que outras partes da aplicação (como a Aba 3)
+		// saibam que uma nova categoria foi selecionada.
+		const event = new CustomEvent('categorySelected', {
+			detail: { categoryId: id, categoryName: name }
+		});
+		document.dispatchEvent(event);
+		// --- FIM DA ADIÇÃO ---
+
+		loadMlAttributesForCategory(id); // Sua chamada original pode ser substituída pelo evento, mas vamos manter por segurança
     }
 
     if (suggestMlCategoryBtn) { suggestMlCategoryBtn.addEventListener('click', async () => {
@@ -624,6 +633,292 @@ document.addEventListener('DOMContentLoaded', function () {
         catch (error) { if(descriptionStatusEl) {descriptionStatusEl.textContent = `Erro IA: ${error.message}`; descriptionStatusEl.className = 'status-message error';}}
         finally { generateDescChatGptBtn.disabled = false; }
     });}
+	
+	
+		
+	// Adicione este bloco dentro de static/js/dashboard.js
+
+	// =================================================================================
+	// --- LÓGICA PARA ABA "IMAGENS" ---
+	// =================================================================================
+	function initializeImagensPage() {
+		// Seletores de elementos da aba de imagens
+		const newImageUrlInput = document.getElementById('newImageUrlInput');
+		const addImageUrlBtn = document.getElementById('addImageUrlBtn');
+		const imageListContainer = document.getElementById('image-list-container');
+		const optimizeFirstBtn = document.getElementById('optimizeFirstImageBtn');
+		const optimizeAllBtn = document.getElementById('optimizeAllImagesBtn'); // Implementaremos a lógica depois
+		const removeBgBtn = document.getElementById('removeBgFirstImageBtn');
+		const statusBar = document.getElementById('image-status-bar');
+
+		// Estado: um array para guardar as URLs das imagens
+		let productImages = [];
+
+		// Função para renderizar/redesenhar a lista de imagens
+		function renderImages() {
+			if (!imageListContainer) return;
+			imageListContainer.innerHTML = ''; // Limpa a lista atual
+
+			if (productImages.length === 0) {
+				imageListContainer.innerHTML = '<p class="text-muted">Nenhuma imagem adicionada.</p>';
+				return;
+			}
+
+			productImages.forEach((imageUrl, index) => {
+				const block = document.createElement('div');
+				block.className = 'd-flex align-items-center p-2 border rounded mb-2';
+				block.innerHTML = `
+					<img src="${imageUrl.split('#')[0]}" class="img-thumbnail me-3" style="width: 80px; height: 80px; object-fit: cover;" alt="Thumbnail">
+					<div class="flex-grow-1">
+						<p class="fw-bold mb-1">${index + 1}.</p>
+						<p class="mb-1 small text-break text-muted">${imageUrl}</p>
+						<p class="mb-0 text-muted small"><strong>Res:</strong> Carregando...</p>
+					</div>
+					<div class="d-flex align-items-center gap-2 ms-3">
+						<button class="btn btn-light btn-sm btn-edit-colors" title="Editar Cores"><i class="bi bi-palette"></i></button>
+						<button class="btn btn-light btn-sm text-danger btn-remove-image" title="Remover Imagem"><i class="bi bi-trash"></i></button>
+						<div class="btn-group-vertical btn-group-sm">
+							<button type="button" class="btn btn-outline-secondary border-0 btn-move-up" title="Mover para Cima" ${index === 0 ? 'disabled' : ''}><i class="bi bi-arrow-up"></i></button>
+							<button type="button" class="btn btn-outline-secondary border-0 btn-move-down" title="Mover para Baixo" ${index === productImages.length - 1 ? 'disabled' : ''}><i class="bi bi-arrow-down"></i></button>
+						</div>
+					</div>
+				`;
+				imageListContainer.appendChild(block);
+			});
+		}
+		
+		// Conectar os botões de ação
+		if (addImageUrlBtn) {
+			addImageUrlBtn.addEventListener('click', () => {
+				const url = newImageUrlInput.value.trim();
+				if (url && url.startsWith('http')) {
+					if (productImages.length < 12) {
+						productImages.push(url);
+						newImageUrlInput.value = '';
+						renderImages();
+					} else {
+						alert('Limite de 12 imagens atingido.');
+					}
+				} else {
+					alert('Por favor, insira uma URL válida.');
+				}
+			});
+		}
+		
+		// Função genérica para processamento de imagem
+		async function processImage(apiUrl, firstImageUrl, processingMessage) {
+			statusBar.textContent = processingMessage;
+			statusBar.style.display = 'block';
+			optimizeFirstBtn.disabled = true;
+			removeBgBtn.disabled = true;
+
+			try {
+				const response = await fetch(apiUrl, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ imageUrl: firstImageUrl })
+				});
+				const result = await response.json();
+
+				if (!response.ok) {
+					throw new Error(result.error_message || `Erro do servidor: ${response.status}`);
+				}
+				
+				// Adiciona a nova URL no início da lista e remove a antiga
+				productImages = productImages.filter(url => url !== firstImageUrl);
+				productImages.unshift(result.newUrl + "#_processed"); // Adiciona uma tag para sabermos que foi processada
+				renderImages();
+				
+				statusBar.textContent = `Imagem processada com sucesso via ${result.service_used}!`;
+				statusBar.className = 'status-message success mt-2';
+
+			} catch (error) {
+				statusBar.textContent = `Erro: ${error.message}`;
+				statusBar.className = 'status-message error mt-2';
+			} finally {
+				optimizeFirstBtn.disabled = false;
+				removeBgBtn.disabled = false;
+			}
+		}
+
+		if (optimizeFirstBtn) {
+			optimizeFirstBtn.addEventListener('click', () => {
+				if (productImages.length > 0) {
+					processImage('/api/image/optimize', productImages[0], 'Otimizando primeira imagem...');
+				}
+			});
+		}
+
+		if (removeBgBtn) {
+			removeBgBtn.addEventListener('click', () => {
+				if (productImages.length > 0) {
+					processImage('/api/image/remove-background', productImages[0], 'Removendo fundo da primeira imagem...');
+				}
+			});
+		}
+		
+		// Adicionar listeners para os botões de remover e mover
+		imageListContainer.addEventListener('click', (event) => {
+			const removeBtn = event.target.closest('.btn-remove-image');
+			const moveUpBtn = event.target.closest('.btn-move-up');
+			const moveDownBtn = event.target.closest('.btn-move-down');
+			
+			if (removeBtn || moveUpBtn || moveDownBtn) {
+				const block = event.target.closest('.d-flex.align-items-center');
+				const index = Array.from(imageListContainer.children).indexOf(block);
+
+				if (removeBtn) {
+					productImages.splice(index, 1);
+					renderImages();
+				}
+				if (moveUpBtn && index > 0) {
+					[productImages[index], productImages[index - 1]] = [productImages[index - 1], productImages[index]];
+					renderImages();
+				}
+				if (moveDownBtn && index < productImages.length - 1) {
+					[productImages[index], productImages[index + 1]] = [productImages[index + 1], productImages[index]];
+					renderImages();
+				}
+			}
+		});
+
+		// Renderiza a lista vazia inicialmente
+		renderImages();
+	}
+
+	// Modifique sua função `initializePageScripts` para chamar a nova função quando a aba de imagens for carregada
+	function initializePageScripts(pageName) {
+		if (pageName === 'produto-sku') {
+			initializeProdutoSkuPage();
+		} else if (pageName === 'imagens') { // <-- ADICIONE ESTA CONDIÇÃO
+			initializeImagensPage();
+		}
+	}
+	
+
+
+	// Adicione este bloco dentro de static/js/dashboard.js
+
+	// =================================================================================
+	// --- LÓGICA PARA ABA "FICHA TÉCNICA & DESCRIÇÃO" ---
+	// =================================================================================
+	function initializeFichaTecnicaPage() {
+		const attributesContainer = document.getElementById('attributes-container');
+		const attributesStatus = document.getElementById('attributes-status');
+		const generateDescBtn = document.getElementById('generate-description-btn');
+		const descriptionTextarea = document.getElementById('description-textarea');
+		const descriptionStatus = document.getElementById('description-status');
+
+		// Variável global para guardar o ID da categoria atual
+		let currentCategoryId = null; 
+
+		// Função para carregar os atributos
+		async function loadAttributes(categoryId) {
+			if (!categoryId) {
+				attributesContainer.innerHTML = '<p class="text-muted">Selecione uma categoria na Aba 1.</p>';
+				return;
+			}
+			
+			// Evita recarregar se a categoria for a mesma
+			if (categoryId === currentCategoryId) return; 
+			currentCategoryId = categoryId;
+
+			attributesContainer.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Carregando...</span></div>';
+			attributesStatus.textContent = 'Carregando atributos...';
+			attributesStatus.className = 'status-message info';
+			attributesStatus.style.display = 'block';
+
+			try {
+				const response = await fetch(`/api/ml/category-attributes/${categoryId}`);
+				const attributes = await response.json();
+
+				if (!response.ok) {
+					throw new Error(attributes.error_message || 'Erro ao buscar atributos.');
+				}
+
+				attributesContainer.innerHTML = ''; // Limpa o "loading"
+				if (attributes.length === 0) {
+					attributesContainer.innerHTML = '<p class="text-muted">Nenhum atributo encontrado para esta categoria.</p>';
+				} else {
+					attributes.forEach(attr => {
+						// Cria o HTML para cada atributo (exemplo simples)
+						const attrDiv = document.createElement('div');
+						attrDiv.className = 'mb-3';
+						attrDiv.innerHTML = `
+							<label for="attr-${attr.id}" class="form-label">${attr.name} ${attr.tags.required ? '<span class="text-danger">*</span>' : ''}</label>
+							<input type="text" class="form-control" id="attr-${attr.id}">
+						`;
+						attributesContainer.appendChild(attrDiv);
+					});
+				}
+				attributesStatus.textContent = `${attributes.length} atributos carregados.`;
+				attributesStatus.className = 'status-message success';
+
+			} catch (error) {
+				attributesContainer.innerHTML = `<p class="text-danger">${error.message}</p>`;
+				attributesStatus.textContent = `Erro: ${error.message}`;
+				attributesStatus.className = 'status-message error';
+			}
+		}
+
+		// "Ouvinte" global para o evento de categoria selecionada
+		// Quando a categoria for selecionada na Aba 1, vamos disparar este evento
+		document.addEventListener('categorySelected', (event) => {
+			const { categoryId, categoryName } = event.detail;
+			console.log(`Ficha Técnica ouviu o evento: Categoria ${categoryId} selecionada.`);
+			loadAttributes(categoryId);
+		});
+		
+		// Conectar botão do ChatGPT
+		if (generateDescBtn) {
+			generateDescBtn.addEventListener('click', async () => {
+				const titleInput = document.getElementById('mlTitleInput'); // Pega o título da Aba 1
+				const title = titleInput ? titleInput.value.trim() : '';
+
+				if (!title) {
+					alert('O título do produto (na Aba 1) precisa ser preenchido.');
+					return;
+				}
+
+				descriptionStatus.textContent = 'Gerando descrição com IA...';
+				descriptionStatus.className = 'status-message info';
+				descriptionStatus.style.display = 'block';
+				generateDescBtn.disabled = true;
+				
+				try {
+					const response = await fetch('/api/ml/generate-description-chatgpt', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ title: title, current_description: descriptionTextarea.value })
+					});
+					const result = await response.json();
+					if (!response.ok) throw new Error(result.error_message || 'Erro do servidor');
+
+					descriptionTextarea.value = result.new_description_html;
+					descriptionStatus.textContent = 'Descrição gerada e inserida!';
+					descriptionStatus.className = 'status-message success';
+
+				} catch (error) {
+					descriptionStatus.textContent = `Erro: ${error.message}`;
+					descriptionStatus.className = 'status-message error';
+				} finally {
+					generateDescBtn.disabled = false;
+				}
+			});
+		}
+	}
+
+	// Modifique a função `initializePageScripts` para chamar a nova função
+	function initializePageScripts(pageName) {
+		if (pageName === 'produto-sku') {
+			initializeProdutoSkuPage();
+		} else if (pageName === 'imagens') {
+			initializeImagensPage();
+		} else if (pageName === 'ficha-tecnica') { // <-- ADICIONE ESTA CONDIÇÃO
+			initializeFichaTecnicaPage();
+		}
+	}
+	
 
     // --- INICIALIZAÇÃO GERAL ---
     loadMLAccounts();

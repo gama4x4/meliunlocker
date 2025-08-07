@@ -375,7 +375,54 @@
 			<div id="categoryBrowserStatus" class="status-message info" style="margin-top: 10px;"></div>
 		</div>
 	</div>
+	
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 
-	<script type="module" src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+<!-- =================================================================== -->
+<!-- == INÍCIO DO CÓDIGO DO MODAL DE CATEGORIAS (ADICIONAR ESTE BLOCO) == -->
+<!-- =================================================================== -->
+<div class="modal fade" id="mlCategoryBrowserModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="categoryModalLabel"><i class="bi bi-diagram-3 me-2"></i>Navegador de Categorias ML</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeCategoryBrowserModal"></button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Controles de Busca dentro do Modal -->
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Buscar categoria por termo..." id="categorySearchInput">
+            <button class="btn btn-primary" type="button" id="searchCategoryBtn"><i class="bi bi-search"></i> Buscar</button>
+        </div>
+        
+        <!-- Lista de Categorias -->
+        <div class="border rounded p-3" style="min-height: 400px;">
+            <a href="#" id="loadRootCategoriesLink">Carregar categorias raiz</a>
+            <hr>
+            <ul id="categoryListUl" class="category-tree">
+                <!-- O JavaScript irá preencher esta lista -->
+                <li class="text-muted">Use a busca ou carregue as categorias raiz.</li>
+            </ul>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <div id="categoryBrowserStatus" class="status-message me-auto">Pronto.</div>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- =================================================================== -->
+<!-- == FIM DO CÓDIGO DO MODAL == -->
+<!-- =================================================================== -->
+
+
+
+
 </body>
 </html>

@@ -11,11 +11,12 @@
         <i class="bi bi-list-check me-2"></i><strong>Ficha Técnica (Atributos da Categoria ML)</strong>
     </div>
     <div class="card-body">
-        <!-- Esta área será preenchida dinamicamente pelo JavaScript
-             quando uma categoria for selecionada na Aba 1. -->
+        <!-- ADICIONADO ID -->
         <div id="attributes-container">
             <p class="text-muted">Selecione uma categoria na Aba 1 para carregar os atributos aqui.</p>
         </div>
+        <!-- ADICIONADO: Área para status -->
+        <div id="attributes-status" class="status-message info mt-2" style="display: none;"></div>
     </div>
 </div>
 
@@ -26,15 +27,19 @@
     </div>
     <div class="card-body">
         <div class="mb-3">
-            <button class="btn btn-info text-white">
+            <!-- ADICIONADO ID -->
+            <button class="btn btn-info text-white" id="generate-description-btn">
                 <i class="bi bi-stars me-2"></i>Gerar Descrição com IA (ChatGPT)
             </button>
         </div>
         
         <div class="mb-3">
             <label for="description-textarea" class="form-label">Conteúdo da Descrição (HTML ou texto puro):</label>
+            <!-- ADICIONADO ID -->
             <textarea class="form-control" id="description-textarea" rows="15"></textarea>
         </div>
+         <!-- ADICIONADO: Área para status -->
+        <div id="description-status" class="status-message" style="display: none;"></div>
     </div>
 </div>
 
