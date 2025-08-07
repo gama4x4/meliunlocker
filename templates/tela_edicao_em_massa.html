@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Edição em Massa{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">8. Editar Anúncios em Massa</h1>
+
+<!-- Card principal -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-grid-3x3-gap-fill me-2"></i><strong>Edição em Massa de Anúncios</strong>
+    </div>
+    <div class="card-body">
+
+        <!-- Seção de Filtros -->
+        <div class="p-3 border rounded mb-4 bg-light">
+            <h6>Filtros de Anúncios</h6>
+            <div class="row g-2 align-items-center">
+                <div class="col-md-3"><input type="text" class="form-control form-control-sm" placeholder="Filtrar por Título..."></div>
+                <div class="col-md-3"><input type="text" class="form-control form-control-sm" placeholder="Filtrar por SKU/MLB..."></div>
+                <div class="col-md-3"><select class="form-select form-select-sm"><option selected>Todas as Contas</option></select></div>
+                <div class="col-md-3"><select class="form-select form-select-sm"><option selected>Todos os Status</option></select></div>
+                <div class="col-md-3"><select class="form-select form-select-sm"><option selected>Todos os Motivos</option></select></div>
+                <div class="col-md-3"><input type="text" class="form-control form-control-sm" placeholder="Tempo Fab. (ex: >5)..."></div>
+                <div class="col-md-3"><select class="form-select form-select-sm"><option selected>Frete Grátis?</option><option>Sim</option><option>Não</option></select></div>
+                <div class="col-md-3 d-flex justify-content-end">
+                    <button class="btn btn-primary btn-sm">Aplicar Filtros</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botões de Ação da Lista -->
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <button class="btn btn-success"><i class="bi bi-cloud-download me-1"></i>Buscar Todos Anúncios</button>
+            <button class="btn btn-info"><i class="bi bi-folder-symlink me-1"></i>Carregar Lista</button>
+            <button class="btn btn-secondary"><i class="bi bi-save me-1"></i>Salvar Lista</button>
+            <button class="btn btn-danger"><i class="bi bi-file-earmark-pdf me-1"></i>Gerar PDF</button>
+        </div>
+
+        <!-- Tabela de Anúncios -->
+        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+            <table class="table table-bordered table-striped table-hover table-sm">
+                <thead class="table-dark" style="position: sticky; top: 0;">
+                    <tr>
+                        <th><input type="checkbox" class="form-check-input"></th>
+                        <th>Img</th>
+                        <th>Conta</th>
+                        <th>ID Anúncio</th>
+                        <th>Título</th>
+                        <th>SKU</th>
+                        <th>Status Detalhado</th>
+                        <th>Preço Atual</th>
+                        <th>Vend.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Exemplo de linha de anúncio -->
+                    <tr>
+                        <td><input type="checkbox" class="form-check-input"></td>
+                        <td><img src="https://via.placeholder.com/40" alt="thumb" style="width: 40px; height: 40px;"></td>
+                        <td>CONTA_EX_1</td>
+                        <td>MLB12345678</td>
+                        <td>Produto de Exemplo para Edição em Massa</td>
+                        <td>SKU-001</td>
+                        <td>Pausado (Estoque)</td>
+                        <td>R$ 99,90</td>
+                        <td>123</td>
+                    </tr>
+                    <!-- Mais linhas aqui... -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Painel de Ações em Abas -->
+        <div class="mt-4">
+            <h5 class="mb-3">Ações em Lote para Anúncios Selecionados</h5>
+            <ul class="nav nav-tabs" id="actionsTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-geral" type="button">Geral & Frete</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-precos" type="button">Preços</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-imagens-acoes" type="button">Imagens</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-compat" type="button">Compatibilidade</button>
+                </li>
+            </ul>
+            <div class="tab-content border border-top-0 p-3 rounded-bottom">
+                <div class="tab-pane fade show active" id="tab-geral">
+                    <p>Controles para alterar Status, Estoque, Tempo de Fabricação, etc., aparecerão aqui.</p>
+                </div>
+                <div class="tab-pane fade" id="tab-precos">
+                    <p>Controles para recálculo de preços em lote aparecerão aqui.</p>
+                </div>
+                <div class="tab-pane fade" id="tab-imagens-acoes">
+                    <p>Opções para aplicar imagens em lote (ex: da Aba 2) aparecerão aqui.</p>
+                </div>
+                <div class="tab-pane fade" id="tab-compat">
+                    <p>Opções para aplicar um perfil de compatibilidade em lote aparecerão aqui.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botão Final de Execução -->
+        <div class="d-grid mt-4">
+             <button class="btn btn-warning fw-bold p-3" type="button">
+                <i class="bi bi-play-circle-fill me-2"></i>EXECUTAR AÇÕES EM LOTE NOS ANÚNCIOS SELECIONADOS
+            </button>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

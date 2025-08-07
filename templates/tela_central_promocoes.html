@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Central de Promoções{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">11. Central de Promoções</h1>
+
+<!-- Card principal -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-graph-up-arrow me-2"></i><strong>Gerenciamento de Promoções</strong>
+    </div>
+    <div class="card-body">
+
+        <!-- Seção de Filtros e Ações Principais -->
+        <div class="p-3 border rounded mb-4 bg-light">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-3">
+                    <label for="promoAccountFilter" class="form-label">Conta ML:</label>
+                    <select id="promoAccountFilter" class="form-select">
+                        <option selected>Todas as Contas</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="promoTypeFilter" class="form-label">Tipo Campanha:</label>
+                    <select id="promoTypeFilter" class="form-select">
+                        <option selected>TODOS OS TIPOS</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="promoStatusFilter" class="form-label">Status Campanha:</label>
+                    <select id="promoStatusFilter" class="form-select">
+                        <option selected>TODOS OS STATUS</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" type="button">Forçar Atualização (API)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Promoções -->
+        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+            <table class="table table-striped table-hover table-sm">
+                <thead class="table-dark" style="position: sticky; top: 0;">
+                    <tr>
+                        <th>ID Promo</th>
+                        <th>Nome da Promoção</th>
+                        <th>Tipo</th>
+                        <th>Status</th>
+                        <th>Início</th>
+                        <th>Fim</th>
+                        <th>Prazo</th>
+                        <th>Detalhes</th>
+                        <th>Conta</th>
+                    </tr>
+                </thead>
+                <tbody id="promotions-table-body">
+                    <!-- Exemplo de linha de promoção -->
+                    <tr>
+                        <td>P-MLB123456</td>
+                        <td>Campanha Dia dos Pais</td>
+                        <td>Tradicional (Deal)</td>
+                        <td><span class="badge bg-success">active</span></td>
+                        <td>10/07/24 00:00</td>
+                        <td>12/08/24 23:59</td>
+                        <td>01/07/24 23:59</td>
+                        <td>Rebate: ML 20.0% + Sell 80.0%</td>
+                        <td>CONTA_EXEMPLO_1</td>
+                    </tr>
+                    <!-- Mais linhas aqui... -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Botões de Ação da Lista -->
+        <div class="d-flex justify-content-between mt-4">
+            <button class="btn btn-info" type="button">
+                <i class="bi bi-pencil-fill me-2"></i>Criar Nova Promoção
+            </button>
+            <button class="btn btn-success" type="button">
+                <i class="bi bi-eye-fill me-2"></i>Ver/Gerenciar Itens da Promoção Selecionada
+            </button>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

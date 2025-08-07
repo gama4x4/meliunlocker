@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Atualizar Anúncios{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">5. Atualizar Anúncios</h1>
+
+<!-- Card para a lista de anúncios encontrados -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-list-ul me-2"></i><strong>Anúncios Encontrados para o SKU (da Aba 1)</strong></span>
+        <button class="btn btn-sm btn-outline-danger">Limpar Lista e Campos</button>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-sm">
+                <thead>
+                    <tr>
+                        <th style="width: 5%;"><input class="form-check-input" type="checkbox" id="selectAllAds"></th>
+                        <th style="width: 15%;">Conta ML</th>
+                        <th style="width: 15%;">ID Anúncio</th>
+                        <th style="width: 35%;">Título</th>
+                        <th style="width: 10%;">Status</th>
+                        <th style="width: 10%;">Preço</th>
+                        <th style="width: 10%;">Tipo</th>
+                    </tr>
+                </thead>
+                <tbody id="update-ads-table-body">
+                    <!-- Exemplo de uma linha de anúncio -->
+                    <tr>
+                        <td><input class="form-check-input" type="checkbox"></td>
+                        <td>CONTA_EXEMPLO_1</td>
+                        <td>MLB1234567890</td>
+                        <td>Produto de Exemplo Para Teste de Interface Web</td>
+                        <td>active</td>
+                        <td>R$ 123,45</td>
+                        <td>gold_special</td>
+                    </tr>
+                    <!-- Mais linhas seriam adicionadas aqui pelo JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Card para o painel de ações de atualização -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-ui-checks-grid me-2"></i><strong>Campos para Atualizar nos Anúncios Selecionados</strong>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- Coluna da Esquerda: Lista de campos selecionáveis -->
+            <div class="col-md-4">
+                <div class="border rounded p-3" style="max-height: 400px; overflow-y: auto;">
+                    <h6>Selecione os campos:</h6>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="check-title">
+                        <label class="form-check-label" for="check-title">Título (Apenas s/ vendas)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="check-price">
+                        <label class="form-check-label" for="check-price">Preço</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="check-status">
+                        <label class="form-check-label" for="check-status">Status Anúncio (ML)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="check-quantity">
+                        <label class="form-check-label" for="check-quantity">Quantidade</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="check-description">
+                        <label class="form-check-label" for="check-description">Descrição</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="check-pictures">
+                        <label class="form-check-label" for="check-pictures">Imagens</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="check-attributes">
+                        <label class="form-check-label" for="check-attributes">Ficha Técnica</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="check-compatibilities">
+                        <label class="form-check-label" for="check-compatibilities">Compatibilidade</label>
+                    </div>
+                    <!-- Adicionar mais checkboxes conforme necessário -->
+                </div>
+            </div>
+
+            <!-- Coluna da Direita: Inputs dinâmicos baseados na seleção -->
+            <div class="col-md-8">
+                <div id="dynamic-inputs-container" class="border rounded p-3" style="min-height: 400px;">
+                    <!-- Esta área será preenchida pelo JavaScript -->
+                    <p class="text-muted">Selecione um campo à esquerda para ver as opções de atualização aqui.</p>
+
+                    <!-- Exemplo de como o input para 'Status' apareceria (escondido por padrão) -->
+                    <!-- 
+                    <div class="mb-3">
+                        <label class="form-label">Fonte para 'Status':</label>
+                        <div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="statusSource">
+                                <label class="form-check-label">Manual (active/paused)</label>
+                            </div>
+                        </div>
+                        <select class="form-select mt-2">
+                            <option>active</option>
+                            <option>paused</option>
+                        </select>
+                    </div> 
+                    -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Botões de Ação Final -->
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+            <button class="btn btn-warning" type="button"><i class="bi bi-list-check me-2"></i>ADICIONAR À FILA (DB)</button>
+            <button class="btn btn-success" type="button"><i class="bi bi-play-fill me-2"></i>EXECUTAR AÇÕES AGORA</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

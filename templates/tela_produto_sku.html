@@ -1,0 +1,73 @@
+<!-- Conteúdo de: publicador_web/templates/tela_produto_sku.html -->
+
+<!-- 1. Estende o molde principal -->
+{% extends "base.html" %}
+
+<!-- 2. Define o título específico desta página -->
+{% block title %}Produto & SKU - Publicador Web{% endblock %}
+
+<!-- 3. Insere o conteúdo no "buraco" do molde -->
+{% block content %}
+
+<h1 class="mb-4">Produto & SKU</h1>
+
+<!-- Card para a seção de Busca -->
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-search me-2"></i><strong>Buscar Produto no Tiny ERP</strong>
+    </div>
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-5">
+                <label for="skuTiny" class="form-label">Buscar por Código (SKU) Tiny:</label>
+                <input type="text" class="form-control" id="skuTiny" placeholder="Ex: MEU_SKU_123">
+            </div>
+            <div class="col-md-1 text-center">
+                <span class="text-muted">ou</span>
+            </div>
+            <div class="col-md-5">
+                <label for="idTiny" class="form-label">por ID numérico Tiny:</label>
+                <input type="text" class="form-control" id="idTiny" placeholder="Ex: 12345678">
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button class="btn btn-primary w-100 mt-4">Buscar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Card para os Detalhes do Anúncio -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-card-list me-2"></i><strong>Detalhes do Anúncio (para Mercado Livre)</strong>
+    </div>
+    <div class="card-body">
+        <form>
+            <div class="mb-3">
+                <label for="tituloAnuncio" class="form-label">Título Anúncio ML (máx. 60):</label>
+                <input type="text" class="form-control" id="tituloAnuncio" maxlength="60">
+                <div class="form-text text-end">0/60</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="quantidade" class="form-label">Quantidade (Estoque ML):</label>
+                    <input type="number" class="form-control" id="quantidade" value="0">
+                </div>
+                <div class="col-md-6">
+                    <label for="sellerSku" class="form-label">Seu SKU (Seller SKU no ML):</label>
+                    <input type="text" class="form-control" id="sellerSku" placeholder="SKU que aparecerá no ML">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="categoria" class="form-label">Categoria ML:</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="categoria" placeholder="Nenhuma categoria selecionada" readonly>
+                    <button class="btn btn-outline-secondary" type="button">Sugerir</button>
+                    <button class="btn btn-outline-secondary" type="button">Buscar...</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

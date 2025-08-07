@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Produtos da Tiny{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">12. Produtos da Tiny</h1>
+
+<!-- Card principal -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-box2-fill me-2"></i><strong>Catálogo de Produtos do Tiny ERP</strong>
+    </div>
+    <div class="card-body">
+
+        <!-- Seção de Controles -->
+        <div class="p-3 border rounded mb-4 bg-light">
+            <h6>Controles</h6>
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-primary"><i class="bi bi-cloud-download me-1"></i>Buscar da Tiny (API)</button>
+                <button class="btn btn-secondary"><i class="bi bi-file-earmark-spreadsheet me-1"></i>Substituir Base (Planilha)</button>
+                <button class="btn btn-secondary"><i class="bi bi-file-earmark-plus me-1"></i>Adicionar/Atualizar (Planilha)</button>
+                <button class="btn btn-info"><i class="bi bi-bar-chart-line me-1"></i>Importar Curva ABC (.xlsx)</button>
+            </div>
+        </div>
+
+        <!-- Seção de Filtros -->
+        <div class="p-3 border rounded mb-4">
+             <h6>Filtros</h6>
+             <div class="row g-3 align-items-center">
+                <div class="col-md-4">
+                    <label for="filterSkuDesc" class="form-label">SKU/Descrição:</label>
+                    <input type="text" id="filterSkuDesc" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label for="filterStatusTiny" class="form-label">Status Tiny:</label>
+                    <select id="filterStatusTiny" class="form-select">
+                        <option>Ativo</option>
+                        <option>Inativo</option>
+                        <option>Todos</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="filterListingStatus" class="form-label">Status Cadastro:</label>
+                    <select id="filterListingStatus" class="form-select">
+                        <option>Todos</option>
+                        <option>Cadastrados</option>
+                        <option>Não Cadastrados</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="filterCurva" class="form-label">Curva:</label>
+                    <select id="filterCurva" class="form-select">
+                        <option>Todos</option>
+                        <option>A</option>
+                        <option>B</option>
+                        <option>C</option>
+                        <option>Sem Classif.</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-primary w-100">Aplicar Filtros</button>
+                </div>
+                <div class="col-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="checkRecomendados">
+                        <label class="form-check-label" for="checkRecomendados">Apenas Recomendados para Cadastrar</label>
+                    </div>
+                </div>
+             </div>
+        </div>
+
+        <!-- Tabela de Produtos -->
+        <div class="mb-3">
+            <button class="btn btn-success"><i class="bi bi-box-arrow-up-right me-2"></i>Cadastrar SKU Selecionado na Aba 1</button>
+        </div>
+        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+            <table class="table table-bordered table-striped table-hover table-sm">
+                <thead class="table-dark" style="position: sticky; top: 0;">
+                    <tr>
+                        <th rowspan="2">Pos.</th>
+                        <th rowspan="2">SKU Tiny</th>
+                        <th rowspan="2">Descrição</th>
+                        <th rowspan="2">Estoque</th>
+                        <!-- Cabeçalho dinâmico para as contas ML -->
+                        <th colspan="2" class="text-center">CONTA_EXEMPLO_1</th>
+                        <th colspan="2" class="text-center">CONTA_EXEMPLO_2</th>
+                    </tr>
+                    <tr>
+                        <!-- Sub-cabeçalho para Clássico/Premium -->
+                        <th class="text-center">Cl</th>
+                        <th class="text-center">Pr</th>
+                        <th class="text-center">Cl</th>
+                        <th class="text-center">Pr</th>
+                    </tr>
+                </thead>
+                <tbody id="tiny-products-table-body">
+                    <!-- Exemplo de linha de produto -->
+                    <tr>
+                        <td>1</td>
+                        <td>SKU-ABC-001</td>
+                        <td>Produto Exemplo A da Curva ABC de Vendas</td>
+                        <td>10</td>
+                        <td class="text-center text-success fw-bold">✔</td>
+                        <td class="text-center text-success fw-bold">✔</td>
+                        <td class="text-center text-danger">☐</td>
+                        <td class="text-center text-danger">☐</td>
+                    </tr>
+                     <!-- Exemplo de produto não cadastrado -->
+                    <tr>
+                        <td>2</td>
+                        <td>SKU-XYZ-999</td>
+                        <td>Produto Novo Sem Cadastro no Mercado Livre</td>
+                        <td>50</td>
+                        <td class="text-center text-danger">☐</td>
+          

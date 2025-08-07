@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Atualizar Produto (Tiny/Magento){% endblock %}
+
+{% block content %}
+<h1 class="mb-4">10. Atualizar Produto (Tiny/Magento)</h1>
+
+<!-- Card principal -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-arrow-repeat me-2"></i><strong>Atualizar "Localizador" do Produto</strong>
+    </div>
+    <div class="card-body" style="max-width: 600px;">
+        
+        <p class="text-muted">
+            Esta tela atualiza o campo "Localizador" para o SKU que está atualmente carregado na <strong>Aba 1</strong>.
+        </p>
+
+        <!-- Campo Localizador -->
+        <div class="mb-3">
+            <label for="localizadorInput" class="form-label fw-bold">Novo Localizador:</label>
+            <input type="text" class="form-control" id="localizadorInput" placeholder="Ex: A-01-B02">
+        </div>
+
+        <!-- Checkboxes para selecionar as plataformas -->
+        <div class="mb-4">
+            <label class="form-label fw-bold">Atualizar em:</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="updateTinyCheck">
+                <label class="form-check-label" for="updateTinyCheck">
+                    Tiny ERP
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="updateMagentoCheck">
+                <label class="form-check-label" for="updateMagentoCheck">
+                    Magento 1.x
+                </label>
+            </div>
+        </div>
+
+        <!-- Botão de Ação -->
+        <div class="d-grid">
+            <button class="btn btn-primary btn-lg" type="button">
+                <i class="bi bi-cloud-arrow-up-fill me-2"></i>Enviar Atualizações
+            </button>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

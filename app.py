@@ -813,6 +813,81 @@ def api_ml_calculate_prices_route():
 
     return jsonify(all_results)
 
+# Dentro de app.py
+
+@app.route('/imagens')
+@login_required
+def tela_imagens():
+    return render_template('tela_imagens.html')
+
+# Dentro do seu app.py
+
+@app.route('/ficha-tecnica')
+@login_required
+def tela_ficha_tecnica():
+    return render_template('tela_ficha_tecnica.html')
+
+# Dentro de app.py
+
+@app.route('/precos-publicar')
+@login_required
+def tela_precos_publicar():
+    return render_template('tela_precos_publicar.html')
+
+# Dentro de app.py
+
+@app.route('/atualizar-anuncios')
+@login_required
+def tela_atualizar_anuncios():
+    return render_template('tela_atualizar_anuncios.html')
+
+# Dentro de app.py
+
+@app.route('/replicador')
+@login_required
+def tela_replicador():
+    return render_template('tela_replicador.html')
+
+# Dentro de app.py
+
+@app.route('/compatibilidade')
+@login_required
+def tela_compatibilidade():
+    return render_template('tela_compatibilidade.html')
+
+# Dentro de app.py
+
+@app.route('/edicao-em-massa')
+@login_required
+def tela_edicao_em_massa():
+    return render_template('tela_edicao_em_massa.html')
+
+
+# Dentro de app.py
+
+@app.route('/atualizar-produto')
+@login_required
+def tela_atualizar_produto():
+    return render_template('tela_atualizar_produto.html')
+
+@app.route('/api-client')
+@login_required
+def tela_api_client():
+    return render_template('tela_api_client.html')
+
+# Dentro de app.py
+
+@app.route('/central-promocoes')
+@login_required
+def tela_central_promocoes():
+    return render_template('tela_central_promocoes.html')   
+
+# Dentro de app.py
+
+@app.route('/produtos-tiny')
+@login_required
+def tela_produtos_tiny():
+    return render_template('tela_produtos_tiny.html')
 
 # --- Bloco Principal de Execução ---
 if __name__ == '__main__':

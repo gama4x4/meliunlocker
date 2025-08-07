@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Ficha Técnica & Descrição{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">3. Ficha Técnica & Descrição</h1>
+
+<!-- Card para a Ficha Técnica -->
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-list-check me-2"></i><strong>Ficha Técnica (Atributos da Categoria ML)</strong>
+    </div>
+    <div class="card-body">
+        <!-- Esta área será preenchida dinamicamente pelo JavaScript
+             quando uma categoria for selecionada na Aba 1. -->
+        <div id="attributes-container">
+            <p class="text-muted">Selecione uma categoria na Aba 1 para carregar os atributos aqui.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Card para a Descrição Detalhada -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-file-text-fill me-2"></i><strong>Descrição Detalhada do Anúncio</strong>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <button class="btn btn-info text-white">
+                <i class="bi bi-stars me-2"></i>Gerar Descrição com IA (ChatGPT)
+            </button>
+        </div>
+        
+        <div class="mb-3">
+            <label for="description-textarea" class="form-label">Conteúdo da Descrição (HTML ou texto puro):</label>
+            <textarea class="form-control" id="description-textarea" rows="15"></textarea>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

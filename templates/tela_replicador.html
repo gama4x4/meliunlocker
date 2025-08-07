@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Replicador de Anúncio{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">6. Replicador de Anúncio</h1>
+
+<!-- Card principal do Replicador -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-copy me-2"></i><strong>Replicar Anúncio do Mercado Livre</strong>
+    </div>
+    <div class="card-body">
+        
+        <!-- Seção para buscar o anúncio original -->
+        <div class="input-group mb-4">
+            <span class="input-group-text">URL do Anúncio Original:</span>
+            <input type="text" class="form-control" placeholder="Cole a URL do anúncio do Mercado Livre aqui...">
+            <button class="btn btn-primary" type="button">Puxar Dados</button>
+        </div>
+
+        <!-- Abas para editar os dados do novo anúncio -->
+        <ul class="nav nav-tabs" id="replicatorTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="rep-geral-tab" data-bs-toggle="tab" data-bs-target="#rep-geral" type="button" role="tab">Geral & Preço</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="rep-dims-tab" data-bs-toggle="tab" data-bs-target="#rep-dims" type="button" role="tab">Dimensões</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="rep-desc-tab" data-bs-toggle="tab" data-bs-target="#rep-desc" type="button" role="tab">Descrição</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="rep-img-tab" data-bs-toggle="tab" data-bs-target="#rep-img" type="button" role="tab">Imagens</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="rep-ficha-tab" data-bs-toggle="tab" data-bs-target="#rep-ficha" type="button" role="tab">Ficha Técnica</button>
+            </li>
+        </ul>
+
+        <!-- Conteúdo das Abas -->
+        <div class="tab-content border border-top-0 p-3 rounded-bottom mb-4" id="replicatorTabContent">
+            
+            <!-- Conteúdo da Aba Geral & Preço -->
+            <div class="tab-pane fade show active" id="rep-geral" role="tabpanel">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Título do Anúncio:</label>
+                        <input type="text" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Preço de Venda (R$):</label>
+                        <input type="number" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Quantidade:</label>
+                        <input type="number" class="form-control">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Categoria:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Categoria será carregada aqui..." readonly>
+                            <button class="btn btn-outline-secondary" type="button">Buscar...</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conteúdo da Aba Dimensões -->
+            <div class="tab-pane fade" id="rep-dims" role="tabpanel">
+                <p>Preencha as dimensões do pacote para o novo anúncio.</p>
+                <!-- Formulário de dimensões aqui... -->
+            </div>
+
+            <!-- Conteúdo da Aba Descrição -->
+            <div class="tab-pane fade" id="rep-desc" role="tabpanel">
+                <textarea class="form-control" rows="10"></textarea>
+            </div>
+
+            <!-- Conteúdo da Aba Imagens -->
+            <div class="tab-pane fade" id="rep-img" role="tabpanel">
+                <p>A interface de gerenciamento de imagens (similar à Aba 2) aparecerá aqui.</p>
+            </div>
+
+            <!-- Conteúdo da Aba Ficha Técnica -->
+            <div class="tab-pane fade" id="rep-ficha" role="tabpanel">
+                <p class="text-muted">Os atributos da Ficha Técnica aparecerão aqui após a categoria ser definida.</p>
+            </div>
+        </div>
+
+        <!-- Seção Final de Opções e Ação -->
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5 class="card-title">Opções de Replicação</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <h6>Replicar para as Contas:</h6>
+                        <!-- Checkboxes de contas virão aqui -->
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="rep-acc1">
+                            <label class="form-check-label" for="rep-acc1">CONTA_EXEMPLO_1</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h6>Tipos de Anúncio:</h6>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="rep-classic" checked>
+                            <label class="form-check-label" for="rep-classic">Clássico</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="rep-premium" checked>
+                            <label class="form-check-label" for="rep-premium">Premium</label>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary w-100 fw-bold p-3" type="button">
+                    <i class="bi bi-copy me-2"></i>REPLICAR ANÚNCIO NAS CONTAS SELECIONADAS
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

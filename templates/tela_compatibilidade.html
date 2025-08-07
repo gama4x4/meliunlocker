@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Compatibilidade (Autopeças){% endblock %}
+
+{% block content %}
+<h1 class="mb-4">7. Compatibilidade (Autopeças)</h1>
+
+<!-- Card principal -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-tools me-2"></i><strong>Gerenciar Compatibilidades de Autopeças (Fitment)</strong>
+    </div>
+    <div class="card-body">
+        
+        <!-- Seção Superior: Carregar Item e Gerenciar Perfis -->
+        <div class="row g-3 mb-3 p-3 border rounded bg-light">
+            <!-- Coluna para Carregar Item -->
+            <div class="col-lg-5">
+                <label for="itemIdInput" class="form-label">Item ID (Peça):</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="itemIdInput" placeholder="MLB12345678">
+                    <button class="btn btn-primary" type="button">Carregar do Item ML</button>
+                </div>
+            </div>
+            <!-- Coluna para Perfis -->
+            <div class="col-lg-7">
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label for="profileName" class="form-label">Nome Perfil:</label>
+                        <input type="text" class="form-control" id="profileName">
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <button class="btn btn-success w-100" type="button">Salvar Lista como Perfil</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Layout de Dois Painéis -->
+        <div class="row">
+            <!-- Painel da Esquerda: Definir e Buscar Veículos -->
+            <div class="col-lg-5">
+                <div class="vstack gap-3">
+                    <!-- Card Passo 1A: Definir Veículo -->
+                    <div class="card h-100">
+                        <div class="card-header"><strong>Passo 1: Definir/Buscar Veículo</strong></div>
+                        <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Atributos do veículo aparecerão aqui -->
+                            <div id="vehicle-attributes-container">
+                                <p class="text-muted">Selecione uma categoria de autopeças na Aba 1 para carregar os filtros.</p>
+                            </div>
+                        </div>
+                        <div class="card-footer d-grid gap-2">
+                            <button class="btn btn-secondary" type="button">Buscar Veículos ML</button>
+                            <button class="btn btn-info" type="button">Adicionar Definição Manual >></button>
+                        </div>
+                    </div>
+
+                    <!-- Card Passo 1B: Resultados da Busca -->
+                    <div class="card h-100">
+                        <div class="card-header"><strong>Resultados da Busca de Veículos</strong></div>
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush" style="max-height: 250px; overflow-y: auto;">
+                                <!-- Resultados da busca aparecerão aqui -->
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Volkswagen Gol 1.6</h6>
+                                        <small class="text-muted">MLB12345</small>
+                                    </div>
+                                    <p class="mb-1 small">Ano: 2010 | Versão: Power</p>
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Fiat Palio 1.0</h6>
+                                        <small class="text-muted">MLB67890</small>
+                                    </div>
+                                    <p class="mb-1 small">Ano: 2012 | Versão: Fire</p>
+                                </a>
+                            </div>
+                        </div>
+                         <div class="card-footer d-grid">
+                            <button class="btn btn-success" type="button">Adicionar Selecionados à Lista >></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Painel da Direita: Lista de Compatibilidades -->
+            <div class="col-lg-7">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <strong>Passo 2: Lista de Compatibilidades para o Item</strong>
+                    </div>
+                    <div class="card-body">
+                         <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID/Def Veículo</th>
+                                        <th>Nome/Desc Veículo</th>
+                                        <th>Nota</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Compatibilidades adicionadas aparecerão aqui -->
+                                    <tr>
+                                        <td>MLB12345</td>
+                                        <td>Volkswagen Gol 1.6 (Power)</td

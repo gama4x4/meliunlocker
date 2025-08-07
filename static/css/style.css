@@ -1,0 +1,36 @@
+/* Conteúdo de: publicador_web/static/css/style.css */
+
+body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+.main-container {
+    display: flex;
+    flex-grow: 1;
+}
+.sidebar {
+    width: 280px;
+    background-color: #343a40;
+    padding: 1rem;
+    flex-shrink: 0;
+}
+.sidebar .nav-link {
+    color: #adb5bd;
+    font-size: 0.95rem;
+}
+.sidebar .nav-link.active, .sidebar .nav-link:hover {
+    color: #fff;
+    background-color: #495057;
+}
+.sidebar .nav-link .bi {
+    margin-right: 0.8rem;
+}
+.content {
+    flex-grow: 1;
+    padding: 1.5rem;
+    background-color: #f8f9fa;
+}
+.navbar {
+    flex-shrink: 0;
+}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}API Client{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">9. API Client</h1>
+
+<!-- Card principal -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-braces me-2"></i><strong>Cliente de API Manual</strong>
+    </div>
+    <div class="card-body">
+        
+        <!-- Seção de Configuração da Requisição -->
+        <div class="p-3 border rounded mb-4 bg-light">
+            <div class="row g-3 align-items-center">
+                <!-- Método e URL -->
+                <div class="col-md-2">
+                    <label for="apiMethod" class="form-label">Método:</label>
+                    <select id="apiMethod" class="form-select">
+                        <option>GET</option>
+                        <option>POST</option>
+                        <option>PUT</option>
+                        <option>DELETE</option>
+                    </select>
+                </div>
+                <div class="col-md-10">
+                    <label for="apiUrl" class="form-label">Endpoint / URL:</label>
+                    <input type="text" class="form-control" id="apiUrl" placeholder="/users/me">
+                </div>
+
+                <!-- Target da API e Autenticação -->
+                <div class="col-md-4">
+                    <label for="apiTarget" class="form-label">API Target:</label>
+                    <select id="apiTarget" class="form-select">
+                        <option selected>Mercado Livre</option>
+                        <option>Tiny v3</option>
+                        <option>Magento 1.x</option>
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label for="apiAuth" class="form-label">Autenticação:</label>
+                    <select id="apiAuth" class="form-select">
+                        <option selected>Conta ML Ativa</option>
+                        <option>Token de Aplicação (Público)</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-success w-100"><i class="bi bi-send-fill me-2"></i>Enviar Requisição</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abas para Corpo (Body) e Cabeçalhos (Headers) da Requisição -->
+        <ul class="nav nav-tabs" id="requestTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-body" type="button">Corpo (Body)</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-headers" type="button">Cabeçalhos (Headers)</button>
+            </li>
+        </ul>
+        <div class="tab-content border border-top-0 p-3 rounded-bottom mb-4">
+            <div class="tab-pane fade show active" id="tab-body" role="tabpanel">
+                <textarea class="form-control font-monospace" rows="8" placeholder="Insira o corpo da requisição em formato JSON aqui..."></textarea>
+            </div>
+            <div class="tab-pane fade" id="tab-headers">
+                 <textarea class="form-control font-monospace" rows="8"># Adicione headers extras aqui, um por linha.
+# Ex: Chave: Valor
+# O header 'Authorization' é adicionado automaticamente.</textarea>
+            </div>
+        </div>
+
+        <!-- Seção da Resposta -->
+        <h5>Resposta da API</h5>
+        <div class="p-3 border rounded bg-dark text-light font-monospace" style="max-height: 400px; overflow-y: auto;">
+            <div class="d-flex justify-content-between mb-2">
+                <span class="badge bg-success">Status: 200 OK</span>
+                <span cl

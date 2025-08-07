@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Preços & Publicar{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">4. Preços & Publicar</h1>
+
+<div class="row">
+    <!-- Coluna da Esquerda: Tipos de Anúncio e Calculadora -->
+    <div class="col-lg-6">
+        <!-- Card para Tipos de Anúncio -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-tags-fill me-2"></i><strong>Tipos de Anúncio a Publicar</strong>
+            </div>
+            <div class="card-body">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="checkClassic" checked>
+                    <label class="form-check-label" for="checkClassic">
+                        Clássico (gold_special)
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="checkPremium" checked>
+                    <label class="form-check-label" for="checkPremium">
+                        Premium (API usa 'gold_pro')
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card para Calculadora de Preço -->
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-calculator-fill me-2"></i><strong>Calculadora de Preço</strong>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="costPrice" class="form-label">Preço Base (R$):</label>
+                        <input type="number" class="form-control" id="costPrice" value="0.00">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="desiredProfit" class="form-label">Lucro Desejado (R$):</label>
+                        <input type="number" class="form-control" id="desiredProfit" value="0.00">
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="applyDiscount10">
+                            <label class="form-check-label" for="applyDiscount10">Aplicar Desc. 10% (no Preço Base)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="includeAnticipation">
+                            <label class="form-check-label" for="includeAnticipation">Incluir Taxa de Antecipação</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="offerFreeShipping">
+                            <label class="form-check-label" for="offerFreeShipping">Oferecer Frete Grátis</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <button class="btn btn-success w-100">Calcular Preços para Contas Selecionadas</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coluna da Direita: Publicação e Resultados -->
+    <div class="col-lg-6">
+        <!-- Card para Publicar -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-rocket-takeoff-fill me-2"></i><strong>Publicar no Mercado Livre</strong>
+            </div>
+            <div class="card-body">
+                <p class="card-title">Selecione as contas para publicar:</p>
+                <!-- Checkboxes das contas serão inseridos aqui dinamicamente -->
+                <div id="publish-accounts-container" class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="account1">
+                        <label class="form-check-label" for="account1">CONTA_EXEMPLO_1</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="account2">
+                        <label class="form-check-label" for="account2">CONTA_EXEMPLO_2</label>
+                    </div>
+                </div>
+
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" role="switch" id="autoPromoSwitch">
+                  <label class="form-check-label" for="autoPromoSwitch">Após publicar, tentar ativar em promoções</label>
+                </div>
+
+                <button class="btn btn-primary w-100 fw-bold p-3">PUBLICAR NAS CONTAS SELECIONADAS</button>
+            </div>
+        </div>
+
+        <!-- Card para Resultados -->
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-clipboard-data-fill me-2"></i><strong>Resultados por Conta</strong>
+            </div>
+            <div class="card-body" id="price-results-container" style="min-height: 200px;">
+                <!-- Resultados dos cálculos aparecerão aqui -->
+                <p class="text-muted">Resultados dos cálculos aparecerão aqui.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

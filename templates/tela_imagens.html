@@ -1,0 +1,99 @@
+<!-- Este arquivo estende o layout principal de base.html -->
+{% extends "base.html" %}
+
+<!-- Define o título específico para esta página -->
+{% block title %}Gerenciador de Imagens - Publicador Web{% endblock %}
+
+<!-- Insere o conteúdo principal da página no bloco 'content' do base.html -->
+{% block content %}
+
+<h1 class="mb-4">2. Gerenciador de Imagens</h1>
+
+<!-- Seção de Imagens Cacheadas por SKU -->
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <i class="bi bi-archive-fill me-2"></i><strong>Imagens Tratadas Anteriormente para este SKU</strong>
+    </div>
+    <div class="card-body" style="max-height: 250px; overflow-y: auto;">
+        <!-- O JavaScript irá preencher esta área com as imagens cacheadas -->
+        <div id="cached-images-container">
+            <p class="text-muted" id="cached-images-placeholder">Nenhuma imagem tratada encontrada para o SKU atual.</p>
+            <!-- Exemplo de como uma imagem cacheada apareceria (será gerado dinamicamente) -->
+            <!-- 
+            <div class="d-flex align-items-center p-2 border-bottom">
+                <img src="https://via.placeholder.com/60" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                <div class="flex-grow-1">
+                    <p class="mb-1 small text-break text-muted">https://i.imgur.com/some_cached_image.jpg</p>
+                </div>
+                <button class="btn btn-sm btn-success ms-3"><i class="bi bi-arrow-down-circle me-1"></i> Usar</button>
+            </div>
+            -->
+        </div>
+    </div>
+</div>
+
+<!-- Seção Principal de Gerenciamento de Imagens -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-images me-2"></i><strong>Imagens do Produto Atual (Máx. 12)</strong>
+    </div>
+    <div class="card-body">
+        <!-- Controles Superiores para Adicionar e Processar Imagens -->
+        <div class="p-3 border rounded mb-4 bg-light">
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-6">
+                    <label for="newImageUrl" class="form-label mb-1">Nova URL de Imagem:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="newImageUrl" placeholder="https://exemplo.com/imagem.jpg">
+                        <button class="btn btn-primary" type="button" title="Adicionar URL à lista"><i class="bi bi-plus-lg"></i> Adicionar</button>
+                    </div>
+                </div>
+                <div class="col-lg-6 d-flex justify-content-start justify-content-lg-end gap-2">
+                    <button class="btn btn-outline-secondary" type="button" title="Otimizar primeira imagem para 1000x1000px"><i class="bi bi-aspect-ratio me-1"></i>Otimizar 1ª</button>
+                    <button class="btn btn-outline-secondary" type="button" title="Otimizar todas as imagens da lista"><i class="bi bi-grid-1x2 me-1"></i>Otimizar Todas</button>
+                    <button class="btn btn-outline-info" type="button" title="Remover fundo da primeira imagem usando Remove.bg"><i class="bi bi-magic me-1"></i>Rem. Fundo</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Container para a Lista de Imagens Atuais -->
+        <div id="image-list-container">
+            <!-- Um exemplo de bloco de imagem. O JavaScript irá criar um desses para cada imagem na lista. -->
+            <div class="d-flex align-items-center p-2 border rounded mb-2">
+                <img src="https://via.placeholder.com/80" class="img-thumbnail me-3" style="width: 80px; height: 80px; object-fit: cover;" alt="Thumbnail">
+                <div class="flex-grow-1">
+                    <p class="fw-bold mb-1">1.</p>
+                    <p class="mb-1 small text-break text-muted">https://http2.mlstatic.com/D_NQ_NP_12345-MLB...jpg</p>
+                    <p class="mb-0 text-muted small"><strong>Res:</strong> 1200x1200</p>
+                </div>
+                <div class="d-flex align-items-center gap-2 ms-3">
+                    <button class="btn btn-light btn-sm" title="Editar Cores"><i class="bi bi-palette"></i></button>
+                    <button class="btn btn-light btn-sm text-danger" title="Remover Imagem"><i class="bi bi-trash"></i></button>
+                    <div class="btn-group-vertical btn-group-sm">
+                        <button type="button" class="btn btn-outline-secondary border-0" title="Mover para Cima"><i class="bi bi-arrow-up"></i></button>
+                        <button type="button" class="btn btn-outline-secondary border-0" title="Mover para Baixo"><i class="bi bi-arrow-down"></i></button>
+                    </div>
+                </div>
+            </div>
+            <!-- Outro exemplo para visualização -->
+            <div class="d-flex align-items-center p-2 border rounded mb-2">
+                <img src="https://via.placeholder.com/80" class="img-thumbnail me-3" style="width: 80px; height: 80px; object-fit: cover;" alt="Thumbnail">
+                <div class="flex-grow-1">
+                    <p class="fw-bold mb-1">2.</p>
+                    <p class="mb-1 small text-break text-muted">https://exemplo.com/outra_imagem_longa_aqui...png</p>
+                    <p class="mb-0 text-muted small"><strong>Res:</strong> 800x800</p>
+                </div>
+                <div class="d-flex align-items-center gap-2 ms-3">
+                    <button class="btn btn-light btn-sm" title="Editar Cores"><i class="bi bi-palette"></i></button>
+                    <button class="btn btn-light btn-sm text-danger" title="Remover Imagem"><i class="bi bi-trash"></i></button>
+                    <div class="btn-group-vertical btn-group-sm">
+                        <button type="button" class="btn btn-outline-secondary border-0" title="Mover para Cima"><i class="bi bi-arrow-up"></i></button>
+                        <button type="button" class="btn btn-outline-secondary border-0" title="Mover para Baixo"><i class="bi bi-arrow-down"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
