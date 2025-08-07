@@ -67,26 +67,13 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentMlCategoryIdForAttributes = null;
     let lastTinyProductDataForAttributes = null;
 
+    // --- Seletores para campos que serão preenchidos automaticamente (Aba de Preços) ---
     const costPriceInput = document.getElementById('priceCalcCustoInput');
     const alturaInput = document.getElementById('priceCalcAlturaInput');
     const larguraInput = document.getElementById('priceCalcLarguraInput');
     const comprimentoInput = document.getElementById('priceCalcComprimentoInput');
     const pesoInput = document.getElementById('priceCalcPesoInput');
-    const cepOrigemInput = document.getElementById('priceCalcCepOrigemInput'); // Adicione se quiser popular do Tiny
-
-    let precoBaseParaCusto = 0.0;
-    if (result.preco_promocional_tiny && parseFloat(result.preco_promocional_tiny) > 0) {
-        precoBaseParaCusto = parseFloat(result.preco_promocional_tiny);
-    } else if (result.preco_venda_tiny) {
-        precoBaseParaCusto = parseFloat(result.preco_venda_tiny);
-    }
-    if (costPriceInput) costPriceInput.value = precoBaseParaCusto > 0 ? precoBaseParaCusto.toFixed(2) : '0.00';
-
-
-    if (alturaInput) alturaInput.value = parseFloat(result.altura_embalagem_tiny || 0).toFixed(1);
-    if (larguraInput) larguraInput.value = parseFloat(result.largura_embalagem_tiny || 0).toFixed(1);
-    if (comprimentoInput) comprimentoInput.value = parseFloat(result.comprimento_embalagem_tiny || 0).toFixed(1);
-    if (pesoInput) pesoInput.value = parseFloat(result.peso_bruto_tiny || 0).toFixed(3);
+    const cepOrigemInput = document.getElementById('priceCalcCepOrigemInput');
 
     // =================================================================================
     // --- LÓGICA DE NAVEGAÇÃO POR ABAS ---
@@ -231,7 +218,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (oauthWindow) { oauthWindow.focus(); const timer = setInterval(() => { if (oauthWindow.closed) { clearInterval(timer); if (mlAccountStatusEl) {mlAccountStatusEl.textContent = "Autorização fechada. Verificando...";} setTimeout(loadMLAccounts, 1200);}}, 500);}
         else { if (mlAccountStatusEl) {mlAccountStatusEl.textContent = 'Falha ao abrir pop-up.'; mlAccountStatusEl.className = 'status-message error';}}
     });}
-    // backend/static/js/dashboard.js (CONTINUAÇÃO)
 
     // =================================================================================
     // --- LÓGICA PARA ABA "PRODUTO & SKU" (TINY, CATEGORIA, SKU CHECK) ---
@@ -243,6 +229,91 @@ document.addEventListener('DOMContentLoaded', function () {
             if (currentLength > maxLength) mlTitleCharCount.style.color = 'red';
             else if (currentLength > maxLength - 10 && currentLength <=maxLength) mlTitleCharCount.style.color = 'orange';
             else mlTitleCharCount.style.color = '#777';
+        });
+    }
+
+    // AQUI ESTÁ A LÓGICA PARA O BOTÃO BUSCAR
+    if (fetchTinyProductBtn) {
+        fetchTinyProductBtn.addEventListener('click', async () => {
+            const sku = tinySkuInput ? tinySkuInput.value.trim() : '';
+            const idTiny = tinyIdInput ? tinyIdInput.value.trim() : '';
+
+            if (!sku && !idTiny) {
+                if (tinyProductStatusEl) {
+                    tinyProductStatusEl.textContent = 'Insira SKU ou ID Tiny.';
+                    tinyProductStatusEl.className = 'status-message warning';
+                }
+                return;
+            }
+
+            // Mostra feedback de carregamento
+            fetchTinyProductBtn.disabled = true;
+            fetchTinyProductBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Buscando...';
+            if (tinyProductStatusEl) {
+                tinyProductStatusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando no Tiny...';
+                tinyProductStatusEl.className = 'status-message info';
+            }
+            
+            // Limpa campos relevantes antes de uma nova busca
+            [mlTitleInput, mlSellerSkuInput, mlHandlingTimeInput].forEach(el => { if (el) el.value = ''; });
+            if (mlTitleCharCount) mlTitleCharCount.textContent = '0/60';
+            if (mlQuantityInput) mlQuantityInput.value = '0';
+            if (mlLocalPickupCheckbox) mlLocalPickupCheckbox.checked = false;
+
+            try {
+                const params = new URLSearchParams();
+                if (sku) params.append('sku', sku);
+                if (idTiny) params.append('id', idTiny);
+
+                const response = await fetch(`/api/tiny/product-details?${params.toString()}`);
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error_message || `Erro do servidor: ${response.status}`);
+                }
+                
+                // Preenche os campos da UI com os dados recebidos do backend
+                if (mlTitleInput) mlTitleInput.value = result.nome_tiny || '';
+                if (mlTitleInput) mlTitleInput.dispatchEvent(new Event('input')); 
+                if (mlQuantityInput) mlQuantityInput.value = result.estoque_tiny !== undefined ? result.estoque_tiny : '0';
+                if (mlSellerSkuInput) mlSellerSkuInput.value = result.codigo_tiny || '';
+                if (mlHandlingTimeInput) mlHandlingTimeInput.value = result.dias_preparacao_tiny || '';
+                if (mlLocalPickupCheckbox) mlLocalPickupCheckbox.checked = result.permite_retirada_tiny || false;
+
+                let precoBaseParaCusto = 0.0;
+                if (result.preco_promocional_tiny && parseFloat(result.preco_promocional_tiny) > 0) {
+                    precoBaseParaCusto = parseFloat(result.preco_promocional_tiny);
+                } else if (result.preco_venda_tiny) {
+                    precoBaseParaCusto = parseFloat(result.preco_venda_tiny);
+                }
+                if (costPriceInput) costPriceInput.value = precoBaseParaCusto > 0 ? precoBaseParaCusto.toFixed(2) : '0.00';
+                if (alturaInput) alturaInput.value = parseFloat(result.altura_embalagem_tiny || 0).toFixed(1);
+                if (larguraInput) larguraInput.value = parseFloat(result.largura_embalagem_tiny || 0).toFixed(1);
+                if (comprimentoInput) comprimentoInput.value = parseFloat(result.comprimento_embalagem_tiny || 0).toFixed(1);
+                if (pesoInput) pesoInput.value = parseFloat(result.peso_bruto_tiny || 0).toFixed(3);
+
+                if (tinyProductStatusEl) {
+                    tinyProductStatusEl.textContent = `Produto "${result.nome_tiny}" carregado!`;
+                    tinyProductStatusEl.className = 'status-message success';
+                }
+                
+                lastTinyProductDataForAttributes = result; // Salva os dados para uso posterior
+                if (typeof populateImagesFromTiny === "function") { populateImagesFromTiny(result.anexos_tiny); }
+                if (mlDescriptionTextarea && result.descricao_complementar_tiny !== undefined) { mlDescriptionTextarea.value = result.descricao_complementar_tiny; }
+                
+                if (mlTitleInput.value && suggestMlCategoryBtn) { suggestMlCategoryBtn.click(); }
+                if (mlSellerSkuInput.value) { checkMlSkuStatus(mlSellerSkuInput.value); }
+
+            } catch (error) {
+                console.error('Erro ao buscar produto no Tiny:', error);
+                if (tinyProductStatusEl) {
+                    tinyProductStatusEl.textContent = `Erro Tiny: ${error.message}`;
+                    tinyProductStatusEl.className = 'status-message error';
+                }
+            } finally {
+                fetchTinyProductBtn.disabled = false;
+                fetchTinyProductBtn.innerHTML = 'Buscar';
+            }
         });
     }
 
@@ -269,44 +340,6 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) { if(mlSkuCheckResultsArea) mlSkuCheckResultsArea.innerHTML = `<p class="error-message">Erro: ${error.message}</p>`; }
     }
 
-    if (fetchTinyProductBtn) {
-        fetchTinyProductBtn.addEventListener('click', async () => {
-            const sku = tinySkuInput?.value.trim(); const idTiny = tinyIdInput?.value.trim();
-            if (!sku && !idTiny) { if (tinyProductStatusEl) {tinyProductStatusEl.textContent = 'Insira SKU ou ID Tiny.'; tinyProductStatusEl.className = 'status-message error';} return; }
-            if (tinyProductStatusEl) {tinyProductStatusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando Tiny...'; tinyProductStatusEl.className = 'status-message info';}
-            [mlTitleInput, mlSellerSkuInput, mlHandlingTimeInput].forEach(el => {if(el) el.value = '';});
-            if(mlTitleCharCount) mlTitleCharCount.textContent = '0/60'; if(mlQuantityInput) mlQuantityInput.value = '0'; if(mlLocalPickupCheckbox) mlLocalPickupCheckbox.checked = false;
-            if(mlCategoryDisplay) mlCategoryDisplay.value = 'Nenhuma categoria selecionada'; if(mlCategoryIdHidden) mlCategoryIdHidden.value = '';
-            if(mlCategorySuggestionArea) mlCategorySuggestionArea.innerHTML = ''; if(mlCategoryStatus) mlCategoryStatus.textContent = '';
-            if(mlSkuCheckResultsArea) mlSkuCheckResultsArea.innerHTML = '<p>Aguardando busca...</p>';
-            productImages = []; renderProductImages();
-            if(mlDescriptionTextarea) mlDescriptionTextarea.value = '';
-            if(mlAttributesContainer) mlAttributesContainer.innerHTML = '<p>Selecione categoria ML para ver atributos.</p>'; currentMlCategoryIdForAttributes = null; lastTinyProductDataForAttributes = null;
-            try {
-                const params = new URLSearchParams(); if (sku) params.append('sku', sku); if (idTiny) params.append('id', idTiny);
-                const response = await fetch(`/api/tiny/product-details?${params.toString()}`);
-                const result = await response.json();
-                if (!response.ok) { throw new Error(result.error_message || result.message || `Erro ${response.status}`);}
-                if (tinyProductStatusEl) {tinyProductStatusEl.textContent = `Tiny: "${result.nome_tiny || 'N/A'}" carregado!`; tinyProductStatusEl.className = 'status-message success';}
-                lastTinyProductDataForAttributes = result;
-                if (mlTitleInput) mlTitleInput.value = result.nome_tiny || ''; if (mlTitleInput) mlTitleInput.dispatchEvent(new Event('input'));
-                if (mlQuantityInput) mlQuantityInput.value = result.estoque_tiny === undefined ? '0' : result.estoque_tiny.toString();
-                if (mlSellerSkuInput) mlSellerSkuInput.value = result.codigo_tiny || '';
-                if (mlHandlingTimeInput) mlHandlingTimeInput.value = result.dias_preparacao_tiny || '';
-                if (mlLocalPickupCheckbox) mlLocalPickupCheckbox.checked = result.permite_retirada_tiny || false;
-                if (typeof populateImagesFromTiny === "function") { populateImagesFromTiny(result.anexos_tiny); }
-                if(mlDescriptionTextarea && result.descricao_complementar_tiny !== undefined){ mlDescriptionTextarea.value = result.descricao_complementar_tiny; } else if (mlDescriptionTextarea) { mlDescriptionTextarea.value = ''; }
-                console.log("Dados Tiny:", result);
-                if (mlTitleInput.value && suggestMlCategoryBtn) { suggestMlCategoryBtn.dispatchEvent(new Event('click'));}
-                if (mlSellerSkuInput.value) { checkMlSkuStatus(mlSellerSkuInput.value);
-                } else { if(mlSkuCheckResultsArea) mlSkuCheckResultsArea.innerHTML = '<p>Preencha "Seu SKU (ML)".</p>';}
-                if (currentMlCategoryIdForAttributes && mlAttributesContainer && mlAttributesContainer.querySelector('.form-group-attribute')) {
-                    const catAttrsResponse = await fetch(`/api/ml/category-attributes/${currentMlCategoryIdForAttributes}`); const catAttrsResult = await catAttrsResponse.json();
-                    if(catAttrsResult.attributes){ applyTinyDataToMlAttributesUI(lastTinyProductDataForAttributes, catAttrsResult.attributes); }
-                }
-            } catch (error) { if (tinyProductStatusEl) {tinyProductStatusEl.textContent = `Erro Tiny: ${error.message}`; tinyProductStatusEl.className = 'status-message error';}}
-        });
-    }
     if (mlSellerSkuInput) {
         let skuCheckTimeout;
         mlSellerSkuInput.addEventListener('input', () => {
