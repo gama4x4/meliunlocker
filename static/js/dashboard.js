@@ -907,15 +907,226 @@ document.addEventListener('DOMContentLoaded', function () {
 			});
 		}
 	}
+			
+	function initializePrecosPublicarPage() {
+		const calculateBtn = document.getElementById('calculatePricesBtn');
+		const resultsContainer = document.getElementById('price-results-container');
+		const accountsContainer = document.getElementById('publish-accounts-container');
 
-	// Modifique a função `initializePageScripts` para chamar a nova função
+		// ====================== INÍCIO DA MUDANÇA ======================
+		// Esta variável irá armazenar os resultados do cálculo para que o
+		// botão "PUBLICAR" possa acessá-los mais tarde.
+		let calculatedPrices = {}; 
+		// ======================= FIM DA MUDANÇA ========================
+
+		// Função para buscar e renderizar as contas de publicação
+		async function renderPublishAccounts() {
+			if (!accountsContainer) return;
+			// Pega as contas do cache da sessão ou busca na API
+			let accounts = JSON.parse(sessionStorage.getItem('mlAccountsCache') || '{}');
+			if (Object.keys(accounts).length === 0) {
+				const response = await fetch('/api/ml/accounts');
+				accounts = await response.json();
+			}
+			
+			accountsContainer.innerHTML = '';
+			Object.keys(accounts).forEach(nick => {
+				accountsContainer.innerHTML += `
+					<div class="form-check">
+						<input class="form-check-input publish-account-check" type="checkbox" value="${nick}" id="check-${nick}">
+						<label class="form-check-label" for="check-${nick}">${nick}</label>
+					</div>
+				`;
+			});
+		}
+
+		if (calculateBtn) {
+			calculateBtn.addEventListener('click', async () => {
+				// 1. Coletar todos os dados necessários
+				const dataToSend = {
+					cost_price: document.getElementById('priceCalcCustoInput')?.value,
+					desired_profit: document.getElementById('priceCalcLucroInput')?.value,
+					profit_type: 'VALUE', // ou 'PERCENT' se você adicionar essa opção
+					product_category_id: document.getElementById('mlCategoryIdHidden')?.value,
+					apply_discount_10: document.getElementById('priceCalcDiscountCheck')?.checked,
+					include_anticipation_fee: document.getElementById('priceCalcAnticipationCheck')?.checked,
+					offer_free_shipping: document.getElementById('priceCalcFreeShippingCheck')?.checked,
+					publish_classic: document.getElementById('publishClassicCheck')?.checked,
+					publish_premium: document.getElementById('publishPremiumCheck')?.checked,
+					dimensions: {
+						height: document.getElementById('priceCalcAlturaInput')?.value,
+						width: document.getElementById('priceCalcLarguraInput')?.value,
+						length: document.getElementById('priceCalcComprimentoInput')?.value,
+						weight_kg: document.getElementById('priceCalcPesoInput')?.value,
+					},
+					selected_ml_accounts: Array.from(document.querySelectorAll('.publish-account-check:checked')).map(cb => cb.value)
+				};
+
+				// Validação simples
+				if (!dataToSend.product_category_id) {
+					alert('Categoria do ML não selecionada na Aba 1.');
+					return;
+				}
+				if (dataToSend.selected_ml_accounts.length === 0) {
+					alert('Nenhuma conta de publicação selecionada.');
+					return;
+				}
+
+				// 2. Enviar para o backend
+				calculateBtn.disabled = true;
+				calculateBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Calculando...';
+				resultsContainer.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+
+				try {
+					const response = await fetch('/api/ml/calculate-prices', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(dataToSend)
+					});
+					const results = await response.json();
+					if (!response.ok) throw new Error(results.error_message || 'Erro no servidor');
+					
+					// ====================== INÍCIO DA MUDANÇA ======================
+					// Armazena os resultados na variável de escopo mais amplo
+					calculatedPrices = results;
+					// ======================= FIM DA MUDANÇA ========================
+
+					// 3. Renderizar os resultados
+					resultsContainer.innerHTML = ''; // Limpa o "loading"
+					for (const accountNick in results) {
+						const resultData = results[accountNick];
+						let resultHTML = `<div class="card mb-2">
+							<div class="card-header fw-bold">${accountNick}</div>
+							<div class="card-body">`;
+						
+						if (resultData.error) {
+							resultHTML += `<p class="text-danger">${resultData.error}</p>`;
+						} else {
+							if (dataToSend.publish_classic) {
+								resultHTML += `<div><strong>Clássico:</strong> <span class="fs-5">R$ ${resultData.classic_price.toFixed(2)}</span><br><small class="text-muted">${resultData.classic_fees_info}</small></div>`;
+							}
+							if (dataToSend.publish_premium) {
+								resultHTML += `<div class="mt-2"><strong>Premium:</strong> <span class="fs-5">R$ ${resultData.premium_price.toFixed(2)}</span><br><small class="text-muted">${resultData.premium_fees_info}</small></div>`;
+							}
+						}
+						resultHTML += `</div></div>`;
+						resultsContainer.innerHTML += resultHTML;
+					}
+				} catch (error) {
+					resultsContainer.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+				} finally {
+					calculateBtn.disabled = false;
+					calculateBtn.innerHTML = 'Calcular Preços para Contas Selecionadas';
+				}
+			});
+		}
+
+		// Carrega as contas quando a página é inicializada
+		renderPublishAccounts();
+	}
+	
+	// =================================================================================
+	// --- LÓGICA FINAL DE PUBLICAÇÃO ---
+	// =================================================================================
+	function initializePublishLogic() {
+		const publishBtn = document.getElementById('publishBtn');
+		const resultModal = new bootstrap.Modal(document.getElementById('publishResultModal'));
+		const resultBody = document.getElementById('publishResultBody');
+		
+		if (publishBtn) {
+			publishBtn.addEventListener('click', async () => {
+				// 1. Coletar todos os dados das abas
+				const payload = {
+					// Aba 1: Produto & SKU
+					title: document.getElementById('mlTitleInput')?.value,
+					quantity: document.getElementById('mlQuantityInput')?.value,
+					seller_sku: document.getElementById('mlSellerSkuInput')?.value,
+					category_id: document.getElementById('mlCategoryIdHidden')?.value,
+					handling_time: document.getElementById('mlHandlingTimeInput')?.value,
+					local_pickup: document.getElementById('mlLocalPickupCheckbox')?.checked,
+					
+					// Aba 2: Imagens (usa a variável 'productImages' que já criamos)
+					pictures: productImages || [],
+
+					// Aba 3: Descrição e Ficha Técnica
+					description: document.getElementById('mlDescriptionTextarea')?.value,
+					attributes: [], // Será preenchido abaixo
+
+					// Aba 4: Preços e Contas
+					accounts_and_listings: {}, // Será preenchido abaixo
+				};
+
+				// Coletar Ficha Técnica dinamicamente
+				const attributesContainer = document.getElementById('attributes-container');
+				if (attributesContainer) {
+					attributesContainer.querySelectorAll('.form-group-attribute').forEach(attrDiv => {
+						const input = attrDiv.querySelector('input, select');
+						if (input && input.value) {
+							payload.attributes.push({ id: input.name, value_name: input.value });
+						}
+					});
+				}
+
+				// Coletar Contas e Preços Calculados
+				const checkedAccounts = document.querySelectorAll('.publish-account-check:checked');
+				if (checkedAccounts.length === 0) {
+					alert('Nenhuma conta selecionada para publicar.');
+					return;
+				}
+
+				checkedAccounts.forEach(checkbox => {
+					const nick = checkbox.value;
+					const prices = calculatedPrices[nick];
+					if (prices) {
+						payload.accounts_and_listings[nick] = {
+							classic: document.getElementById('publishClassicCheck').checked ? prices.classic_price : null,
+							premium: document.getElementById('publishPremiumCheck').checked ? prices.premium_price : null,
+						};
+					}
+				});
+
+				// Feedback de carregamento
+				publishBtn.disabled = true;
+				publishBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> PUBLICANDO...';
+				
+				try {
+					// 2. Enviar para o backend
+					const response = await fetch('/api/ml/publish', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(payload)
+					});
+					const result = await response.json();
+					if (!response.ok) throw new Error(result.error_message || 'Erro no servidor');
+					
+					// 3. Mostrar resultados no modal
+					resultBody.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+					resultModal.show();
+
+				} catch (error) {
+					resultBody.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+					resultModal.show();
+				} finally {
+					publishBtn.disabled = false;
+					publishBtn.innerHTML = 'PUBLICAR NAS CONTAS SELECIONADAS';
+				}
+			});
+		}
+	}
+
+	// Chame esta nova função na inicialização
+	initializePublishLogic();
+
+	// Modifique sua função `initializePageScripts` para chamar a nova função
 	function initializePageScripts(pageName) {
 		if (pageName === 'produto-sku') {
 			initializeProdutoSkuPage();
 		} else if (pageName === 'imagens') {
 			initializeImagensPage();
-		} else if (pageName === 'ficha-tecnica') { // <-- ADICIONE ESTA CONDIÇÃO
+		} else if (pageName === 'ficha-tecnica') {
 			initializeFichaTecnicaPage();
+		} else if (pageName === 'precos-publicar') { // <-- ADICIONE ESTA CONDIÇÃO
+			initializePrecosPublicarPage();
 		}
 	}
 	

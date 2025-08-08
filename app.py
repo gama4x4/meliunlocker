@@ -424,18 +424,21 @@ def oauth_ml_callback_route():
 @app.route('/api/tiny/product-details', methods=['GET'])
 @login_required
 def api_tiny_product_details_route():
-    sku = request.args.get('sku'); product_id_tiny_str = request.args.get('id')
-    app_cfg = session.get('app_config', {}); tiny_api_token = app_cfg.get('tiny_api_v2_token')
-    if not tiny_api_token: return jsonify({"error_message": "Token Tiny API não configurado."}), 400
+    sku = request.args.get('sku')
+    product_id_tiny_str = request.args.get('id')
     
-    result = fetch_product_details_from_tiny(sku, product_id_tiny_str, tiny_api_token)
+    # A lógica de pegar o token v2 não é mais necessária aqui,
+    # pois o novo tiny_api_service gerencia a autenticação v3 internamente.
     
-    if result.get("error_message"): return jsonify(result), result.get("status_code", 400)
-    elif result.get("not_found"): return jsonify(result), 404
-    elif result.get("product_data"): return jsonify(result.get("product_data")) # Retorna apenas os dados do produto
+    result = fetch_product_details_from_tiny(sku, product_id_tiny_str)
     
-    return jsonify({"error_message": "Resposta Tiny inesperada ou produto não encontrado."}), 500
-
+    if result.get("error_message"):
+        return jsonify({"error_message": result["error_message"]}), result.get("status_code", 500)
+    elif result.get("not_found"):
+        return jsonify({"message": result["message"]}), 404
+    
+    # Retorna o dicionário completo com os dados do produto
+    return jsonify(result)
 
 # == Mercado Livre - Categorias e Atributos ==
 @app.route('/api/ml/suggest-category', methods=['GET'])
@@ -916,6 +919,28 @@ def tela_mensagens():
 @login_required
 def tela_reclamacoes():
     return render_template('tela_reclamacoes.html')
+
+# Dentro de publicador_web/app.py
+
+@app.route('/api/ml/publish', methods=['POST'])
+@login_required
+def publish_to_ml_route():
+    data = request.json
+    
+    # Por enquanto, vamos apenas retornar os dados que recebemos
+    # para confirmar que a comunicação frontend -> backend está funcionando.
+    # No futuro, aqui entrará a lógica de publicação real.
+    
+    print("Dados recebidos para publicação:")
+    import json
+    print(json.dumps(data, indent=2))
+    
+    return jsonify({
+        "status": "Recebido com sucesso!",
+        "message": "A lógica de publicação no Mercado Livre será implementada aqui.",
+        "dados_recebidos": data
+    })
+
 
 # --- Bloco Principal de Execução ---
 if __name__ == '__main__':

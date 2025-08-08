@@ -1,173 +1,136 @@
-# backend/utils/tiny_api_service.py
 import requests
+import time
 import json
-from .helpers import strip_html_tags_for_web
+from .config_manager import load_app_config, save_app_config
 
-# --- Constantes da API Tiny ---
-TINY_API_V2_PRODUTO_OBTER_URL = "https://api.tiny.com.br/api2/produto.obter.php"
-TINY_API_V2_PRODUTOS_PESQUISA_URL = "https://api.tiny.com.br/api2/produtos.pesquisa.php"
-TINY_API_V2_PRODUTO_OBTER_ESTOQUE_URL = "https://api.tiny.com.br/api2/produto.obter.estoque.php"
+# Constantes da API Tiny v3
+TINY_V3_TOKEN_URL = "https://accounts.tiny.com.br/realms/tiny/protocol/openid-connect/token"
+TINY_V3_API_BASE_URL = "https://api.tiny.com.br/public-api/v3"
 
-def _make_tiny_api_request(api_url, params_specific, tiny_api_token):
-    # ... (código como na versão anterior, com os prints de debug) ...
-    if not tiny_api_token:
-        return {"error": True, "status_code": 401, "message": "Token da API v2 do Tiny não está configurado."}
+def _refresh_tiny_v3_token():
+    """Tenta renovar o token de acesso Tiny v3."""
+    config = load_app_config()
+    refresh_token = config.get('tiny_v3_refresh_token')
+    client_id = config.get('tiny_v3_client_id')
+    client_secret = config.get('tiny_v3_client_secret')
 
-    all_params = {"token": tiny_api_token, "formato": "json", **params_specific}
-    request_identifier = params_specific.get('id') or params_specific.get('pesquisa') or 'N/A'
+    if not all([refresh_token, client_id, client_secret]):
+        print("TINY REFRESH: Faltam credenciais para renovar o token.")
+        return None
+
+    payload = {
+        'grant_type': 'refresh_token',
+        'client_id': client_id,
+        'client_secret': client_secret,
+        'refresh_token': refresh_token
+    }
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     try:
-        print(f"Tiny Request: URL={api_url}, Identifier='{request_identifier}'")
-        response = requests.get(api_url, params=all_params, timeout=25)
-        print(f"Tiny Response Status for {request_identifier}: {response.status_code}")
-        try:
-            print(f"Tiny Response Text for {request_identifier} (first 500 chars): {response.text[:500]}")
-        except Exception:
-            print(f"Tiny Response Text for {request_identifier}: Could not print text.")
-
+        response = requests.post(TINY_V3_TOKEN_URL, data=payload, headers=headers, timeout=15)
         response.raise_for_status()
-        data = response.json()
+        token_data = response.json()
+        
+        config['tiny_v3_access_token'] = token_data['access_token']
+        if 'refresh_token' in token_data:
+            config['tiny_v3_refresh_token'] = token_data['refresh_token']
+        config['tiny_v3_expires_at'] = time.time() + token_data['expires_in'] - 60
+        
+        save_app_config(config)
+        print("TINY REFRESH: Token atualizado com sucesso.")
+        return config['tiny_v3_access_token']
+    except requests.RequestException as e:
+        print(f"TINY REFRESH: Erro ao tentar renovar token: {e}")
+        return None
 
-        retorno = data.get("retorno", {})
-        status_processamento = retorno.get("status_processamento")
-        status_retorno = retorno.get("status")
+def _get_tiny_v3_access_token():
+    """Retorna um token v3 válido, tentando refresh se necessário."""
+    config = load_app_config()
+    token = config.get('tiny_v3_access_token')
+    expires_at = float(config.get('tiny_v3_expires_at', 0))
 
-        if status_processamento == "3" and status_retorno == "OK":
-            return {"error": False, "status_code": response.status_code, "data": data}
-        elif status_retorno == "ERRO":
-            erros_api = retorno.get("erros", [])
-            if isinstance(erros_api, list) and erros_api:
-                 error_messages = [str(err.get("erro", "Erro Tiny desconhecido") if isinstance(err, dict) else err) for err in erros_api]
-                 full_error_message = "; ".join(error_messages)
-            elif isinstance(erros_api, dict) and erros_api.get("erro"):
-                full_error_message = str(erros_api.get("erro"))
-            else:
-                full_error_message = f"Erro retornado pela API Tiny: {json.dumps(retorno)}"
-            print(f"Tiny API Error Response: {full_error_message}")
-            return {"error": True, "status_code": retorno.get("codigo_erro", 400), "message": full_error_message}
-        elif api_url == TINY_API_V2_PRODUTOS_PESQUISA_URL and status_retorno == "OK" and not retorno.get("produtos"):
-            print(f"Tiny API Pesquisa: Status OK, mas nenhum produto encontrado para '{params_specific.get('pesquisa')}'.")
-            return {"error": False, "status_code": response.status_code, "data": data}
-        else:
-            print(f"Tiny API Warning/Unexpected: StatusProc='{status_processamento}', StatusRet='{status_retorno}', RetornoData='{retorno}'")
-            return {"error": True, "status_code": 200, "message": f"Resposta inesperada da API Tiny (StatusProc: {status_processamento}, Status: {status_retorno})."}
+    if not token or time.time() >= expires_at:
+        return _refresh_tiny_v3_token()
+    return token
 
+def _tiny_api_v3_request(method, endpoint, params=None, json_data=None):
+    """Função central para fazer requisições à API v3 do Tiny."""
+    access_token = _get_tiny_v3_access_token()
+    if not access_token:
+        return {"error": True, "message": "Não autenticado com a API v3 do Tiny."}
+
+    headers = {'Authorization': f'Bearer {access_token}'}
+    if json_data:
+        headers['Content-Type'] = 'application/json'
+    
+    url = f"{TINY_V3_API_BASE_URL}{endpoint}"
+    try:
+        response = requests.request(method.upper(), url, headers=headers, params=params, json=json_data, timeout=25)
+        response.raise_for_status()
+        return response.json() if response.content else {"success": True}
     except requests.exceptions.HTTPError as e:
-        err_detail = e.response.text[:250] if hasattr(e, 'response') and e.response is not None else str(e)
-        status_code_http = e.response.status_code if hasattr(e, 'response') and e.response is not None else 500
-        print(f"Tiny HTTP Error: {status_code_http} - {err_detail}")
-        return {"error": True, "status_code": status_code_http, "message": f"Erro HTTP API Tiny: {status_code_http} - {err_detail}"}
+        error_text = e.response.text
+        try: error_text = e.response.json()
+        except: pass
+        return {"error": True, "status_code": e.response.status_code, "message": error_text}
     except requests.exceptions.RequestException as e:
-        print(f"Tiny Request Exception: {e}")
-        return {"error": True, "status_code": 503, "message": f"Erro de conexão com API Tiny: {str(e)}"}
-    except json.JSONDecodeError:
-        resp_text = response.text[:250] if 'response' in locals() and hasattr(response, 'text') else "N/A (sem objeto response)"
-        print(f"Tiny JSONDecodeError. Response: {resp_text}")
-        return {"error": True, "status_code": 500, "message": f"Resposta da API Tiny não é JSON válido. Início: {resp_text}"}
-    except Exception as e_gen:
-        print(f"Tiny General Exception em _make_tiny_api_request: {type(e_gen).__name__} - {e_gen}")
-        return {"error": True, "status_code": 500, "message": f"Erro geral na comunicação com API Tiny: {str(e_gen)}"}
+        return {"error": True, "message": f"Erro de conexão com a API Tiny: {e}"}
 
-def get_tiny_product_stock(product_id_tiny, tiny_api_token):
-    if not product_id_tiny:
-        print("get_tiny_product_stock: ID do produto Tiny não fornecido.")
-        return 0
-    response_wrapper = _make_tiny_api_request(
-        TINY_API_V2_PRODUTO_OBTER_ESTOQUE_URL, {"id": product_id_tiny}, tiny_api_token
-    )
-    if not response_wrapper["error"]:
-        stock_data_retorno = response_wrapper["data"].get("retorno", {})
-        if stock_data_retorno.get("status") == "OK":
-            produto_estoque_data = stock_data_retorno.get("produto", {})
-            saldo = produto_estoque_data.get("saldo")
-            if saldo is not None:
-                try: return int(float(saldo))
-                except (ValueError, TypeError):
-                    print(f"Valor de saldo inválido do Tiny para ID {product_id_tiny}: '{saldo}'"); return 0
-            else: print(f"Campo 'saldo' não encontrado para ID {product_id_tiny}."); return 0
-        else: print(f"API Tiny de estoque não OK para ID {product_id_tiny}. Resp: {stock_data_retorno}"); return 0
-    print(f"Erro ao obter estoque para ID Tiny {product_id_tiny}: {response_wrapper.get('message')}"); return 0
+def _get_tiny_product_id_by_sku(sku):
+    """Busca o ID de um produto no Tiny pelo SKU via API v3."""
+    response = _tiny_api_v3_request('GET', '/produtos', params={'codigo': sku, 'limit': 1})
+    if response and not response.get("error") and response.get("itens"):
+        return response["itens"][0].get("id")
+    return None
 
-def fetch_product_details_from_tiny(sku_input, id_input, tiny_api_token):
-    if not tiny_api_token: return {"error_message": "Token API Tiny não fornecido."}
-    if not id_input and not sku_input: return {"error_message": "ID ou SKU Tiny são necessários."}
+def fetch_product_details_from_tiny(sku=None, product_id_tiny=None, token_v2=None):
+    """
+    Busca os detalhes de um produto no Tiny. Lógica principal portada do desktop.
+    Retorna um dicionário com os dados do produto ou uma mensagem de erro.
+    """
+    if not sku and not product_id_tiny:
+        return {"error_message": "SKU ou ID do produto são necessários.", "status_code": 400}
+        
+    try:
+        # Lógica de busca por ID (prioriza o ID se fornecido)
+        tiny_product_id = product_id_tiny
+        if not tiny_product_id and sku:
+            tiny_product_id = _get_tiny_product_id_by_sku(sku)
 
-    id_to_fetch_details, product_found_by_search_name = None, None
-    if id_input: id_to_fetch_details = id_input
-    elif sku_input:
-        search_wrapper = _make_tiny_api_request(TINY_API_V2_PRODUTOS_PESQUISA_URL, {"pesquisa": sku_input}, tiny_api_token)
-        if search_wrapper["error"]: return {"error_message": f"Pesquisa Tiny: {search_wrapper['message']}"}
-        retorno_pesquisa = search_wrapper["data"].get("retorno", {})
-        if retorno_pesquisa.get("status") == "OK":
-            produtos_list = retorno_pesquisa.get("produtos", [])
-            if produtos_list:
-                exact = next((p.get("produto") for p in produtos_list if isinstance(p, dict) and isinstance(p.get("produto"), dict) and p.get("produto", {}).get("codigo") == sku_input), None)
-                if exact: id_to_fetch_details = exact.get("id")
-                else:
-                    first = produtos_list[0].get("produto") if isinstance(produtos_list[0], dict) else None
-                    if first: id_to_fetch_details = first.get("id"); product_found_by_search_name = first.get("nome")
-            else: return {"not_found": True, "message": f"Nenhum produto Tiny para pesquisa: '{sku_input}'"}
-        else: return {"error_message": f"Erro pesquisa Tiny: {retorno_pesquisa.get('erros', [{'erro': 'Status não OK'}])[0].get('erro')}"}
+        if not tiny_product_id:
+            return {"not_found": True, "message": f"Produto com SKU '{sku}' não encontrado no Tiny."}
 
-    if not id_to_fetch_details: return {"error_message": "ID do produto Tiny não determinado."}
+        # Busca os detalhes completos do produto
+        prod_detail = _tiny_api_v3_request('GET', f'/produtos/{tiny_product_id}')
+        if not prod_detail or prod_detail.get("error"):
+            return {"error_message": f"Falha ao obter detalhes: {prod_detail.get('message', 'Erro desconhecido')}"}
 
-    detail_wrapper = _make_tiny_api_request(TINY_API_V2_PRODUTO_OBTER_URL, {"id": id_to_fetch_details}, tiny_api_token)
-    if detail_wrapper["error"]: return {"error_message": f"Detalhes Tiny (ID: {id_to_fetch_details}): {detail_wrapper['message']}"}
+        # Busca o estoque
+        estoque_detail = _tiny_api_v3_request('GET', f'/estoque/{tiny_product_id}')
+        saldo_disponivel = 0
+        if estoque_detail and not estoque_detail.get("error"):
+            saldo_disponivel = float(estoque_detail.get("saldoDisponivel", 0))
 
-    retorno_detalhe = detail_wrapper["data"].get("retorno", {})
-    if retorno_detalhe.get("status") == "OK":
-        product_details_raw = retorno_detalhe.get("produto")
-        if product_details_raw:
-            print("-" * 30)
-            print(f"DEBUG (tiny_api_service): Dados brutos do produto ID {id_to_fetch_details} ANTES do processamento:")
-            print(json.dumps(product_details_raw, indent=2, ensure_ascii=False))
-            print("-" * 30)
+        # Monta o dicionário de resposta para o frontend
+        dimensoes = prod_detail.get("dimensoes", {})
+        precos = prod_detail.get("precos", {})
+        
+        response_data = {
+            "nome_tiny": prod_detail.get("descricao"),
+            "codigo_tiny": prod_detail.get("sku", prod_detail.get("codigo")),
+            "estoque_tiny": saldo_disponivel,
+            "preco_venda_tiny": precos.get("preco"),
+            "preco_promocional_tiny": precos.get("precoPromocional"),
+            "dias_preparacao_tiny": prod_detail.get("estoque", {}).get("diasPreparacao"),
+            "permite_retirada_tiny": prod_detail.get("retirarPessoalmente"),
+            "altura_embalagem_tiny": dimensoes.get("altura"),
+            "largura_embalagem_tiny": dimensoes.get("largura"),
+            "comprimento_embalagem_tiny": dimensoes.get("comprimento"),
+            "peso_bruto_tiny": dimensoes.get("pesoBruto"),
+            "descricao_complementar_tiny": prod_detail.get("descricaoComplementar", ""),
+            "anexos_tiny": prod_detail.get("anexos", []),
+            "product_data": prod_detail # Retorna o objeto completo também
+        }
+        return response_data
 
-            stock = get_tiny_product_stock(product_details_raw.get("id"), tiny_api_token)
-            desc_plain = strip_html_tags_for_web(product_details_raw.get("descricao_complementar", ""))
-            
-            dias_prep = product_details_raw.get("dias_preparacao", "")
-            retirada_str = product_details_raw.get("retiradaLocal", "N") 
-            permite_retirada_bool = True if retirada_str == "S" else False
-            
-            anexos_raw = product_details_raw.get("anexos", [])
-            anexos_formatados = []
-            if isinstance(anexos_raw, list):
-                for anexo_item in anexos_raw:
-                    if isinstance(anexo_item, dict) and anexo_item.get("anexo"):
-                        anexos_formatados.append({"anexo": anexo_item["anexo"]})
-            
-            def get_f_or_def(val_str, default=0.0):
-                if val_str is None or str(val_str).strip() == "": return default
-                try: return float(val_str)
-                except: return default
-
-            processed_product = {
-                "id_tiny": product_details_raw.get("id"),
-                "nome_tiny": product_details_raw.get("nome", ""),
-                "codigo_tiny": product_details_raw.get("codigo", ""),
-                "preco_venda_tiny": get_f_or_def(product_details_raw.get("preco")),
-                "preco_promocional_tiny": get_f_or_def(product_details_raw.get("preco_promocional")),
-                "estoque_tiny": stock,
-                "unidade_tiny": product_details_raw.get("unidade", ""),
-                "gtin_tiny": product_details_raw.get("gtin", product_details_raw.get("codigo_barras", "")),
-                "marca_tiny": product_details_raw.get("marca", ""),
-                "modelo_tiny": product_details_raw.get("modelo", ""),
-                # CORREÇÃO AQUI:
-                "linha_tiny": product_details_raw.get("linhaProduto", product_details_raw.get("linha", "")),
-                "descricao_complementar_tiny": desc_plain,
-                "peso_bruto_tiny": get_f_or_def(product_details_raw.get("peso_bruto")),
-                "altura_embalagem_tiny": get_f_or_def(product_details_raw.get("alturaEmbalagem")),
-                "largura_embalagem_tiny": get_f_or_def(product_details_raw.get("larguraEmbalagem")),
-                "comprimento_embalagem_tiny": get_f_or_def(product_details_raw.get("comprimentoEmbalagem")),
-                "anexos_tiny": anexos_formatados,
-                "dias_preparacao_tiny": str(dias_prep) if dias_prep is not None else "",
-                "permite_retirada_tiny": permite_retirada_bool,
-                "product_found_by_search_name": product_found_by_search_name
-            }
-            print(f"DEBUG (tiny_api_service): Dados processados do Tiny para enviar ao frontend:\n{json.dumps(processed_product, indent=2, ensure_ascii=False)}")
-            return {"product_data": processed_product}
-        else:
-            return {"error_message": f"Produto com ID '{id_to_fetch_details}' não encontrado na resposta de detalhes do Tiny (corpo do produto ausente)."}
-    else:
-        error_msg_detail = retorno_detalhe.get('erros', [{'erro':"Status da obtenção de detalhes Tiny não foi OK."}])[0].get('erro')
-        return {"error_message": f"Erro na resposta ao obter detalhes do produto Tiny (ID: {id_to_fetch_details}): {error_msg_detail}"}
+    except Exception as e:
+        return {"error_message": f"Erro interno no serviço Tiny: {e}", "status_code": 500}

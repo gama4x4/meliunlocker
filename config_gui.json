@@ -1,0 +1,23 @@
+{
+    "API_BASE_URL": "https://erp.tiny.com.br/public-api/v3",
+    "ACCOUNTS_URL": "https://accounts.tiny.com.br/realms/tiny/protocol/openid-connect",
+    "CLIENT_ID": "",
+    "CLIENT_SECRET": "",
+    "REDIRECT_URI": "https://api.meliunlocker.cc/callback",
+    "REFRESH_TOKEN": "",
+    "TOKEN_EXPIRY_TIME": null,
+    "DAYS_TO_FILTER_ORDERS": 7,
+    "MARKETPLACE_CONFIGURATIONS": [
+        {
+            "account_name": "ML Gamalobo (Exemplo)",
+            "ecommerce_api_id": 0,
+            "tag": "Tag_ML_Gamalobo",
+            "note": "Nota para ML Gamalobo",
+            "seller_id": null,
+            "is_active": true,
+            "reverse_stock": false
+        }
+    ],
+    "DEFAULT_SELLER_ID": null,
+    "SEND_TO_SEPARATION_STATUS_ID": 4
+}
