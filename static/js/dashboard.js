@@ -1,4 +1,3 @@
-// backend/static/js/dashboard.js
 document.addEventListener('DOMContentLoaded', function () {
     // --- Seletores Globais de Elementos DOM ---
     const menuItems = document.querySelectorAll('.sidebar .menu-item');
@@ -48,7 +47,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const categoryListUl = document.getElementById('categoryListUl');
     const categoryBrowserStatus = document.getElementById('categoryBrowserStatus');
 
-    // --- Aba Imagens ---
+    // =================================================================================
+    // --- INÍCIO: Seletores e Variáveis para a Aba Imagens ---
+    // =================================================================================
     const newImageUrlInput = document.getElementById('newImageUrlInput');
     const addImageUrlBtn = document.getElementById('addImageUrlBtn');
     const imageAddStatusEl = document.getElementById('imageAddStatus');
@@ -56,7 +57,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const optimizeFirstImageBtn = document.getElementById('optimizeFirstImageBtn');
     const removeBgFirstImageBtn = document.getElementById('removeBgFirstImageBtn');
     const removeBgCreditsTabImagensEl = document.getElementById('removeBgCreditsTabImagens');
-    let productImages = [];
+    let productImages = []; // Array que armazena as URLs das imagens
+    // =================================================================================
+    // --- FIM: Seletores e Variáveis para a Aba Imagens ---
+    // =================================================================================
 
     // --- Aba Ficha & Descrição ---
     const mlDescriptionTextarea = document.getElementById('mlDescriptionTextarea');
@@ -74,6 +78,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const comprimentoInput = document.getElementById('priceCalcComprimentoInput');
     const pesoInput = document.getElementById('priceCalcPesoInput');
     const cepOrigemInput = document.getElementById('priceCalcCepOrigemInput');
+
 
     // =================================================================================
     // --- LÓGICA DE NAVEGAÇÃO POR ABAS ---
@@ -356,14 +361,14 @@ document.addEventListener('DOMContentLoaded', function () {
         if (mlCategorySuggestionArea) mlCategorySuggestionArea.innerHTML = '';
         if (categoryBrowserModal) categoryBrowserModal.style.display = 'none';
         console.log(`Categoria ML definida: ID=${id}, Nome='${name}'`);
-		// --- ADICIONE ESTA SEÇÃO ---
-		// Dispara um evento personalizado para que outras partes da aplicação (como a Aba 3)
-		// saibam que uma nova categoria foi selecionada.
-		const event = new CustomEvent('categorySelected', {
-			detail: { categoryId: id, categoryName: name }
-		});
-		document.dispatchEvent(event);
-		// --- FIM DA ADIÇÃO ---
+        
+        // --- ADICIONADO: Dispara um evento personalizado ---
+        // Isso permite que outras partes do código (como a Aba 3) reajam a essa mudança.
+        const event = new CustomEvent('categorySelected', {
+            detail: { categoryId: id, categoryName: name }
+        });
+        document.dispatchEvent(event);
+        // --- FIM DA ADIÇÃO ---
 
 		loadMlAttributesForCategory(id); // Sua chamada original pode ser substituída pelo evento, mas vamos manter por segurança
     }
@@ -548,48 +553,155 @@ document.addEventListener('DOMContentLoaded', function () {
     // --- LÓGICA PARA ABA "IMAGENS" ---
     // =================================================================================
     function renderProductImages() {
-        if (!imagePreviewContainer) return; imagePreviewContainer.innerHTML = '';
-        if (productImages.length === 0) { imagePreviewContainer.innerHTML = '<p>Nenhuma imagem.</p>'; if(optimizeFirstImageBtn) optimizeFirstImageBtn.disabled = true; if(removeBgFirstImageBtn) removeBgFirstImageBtn.disabled = true; updateRemoveBgCreditsDisplay(); return; }
-        const appConfig = JSON.parse(sessionStorage.getItem('appConfigCache') || '{}'); const hasImgurKey = !!appConfig.imgur_client_id; const hasRemoveBgKey = !!appConfig.removebg_api_key;
-        if(optimizeFirstImageBtn) optimizeFirstImageBtn.disabled = !(productImages.length > 0 && hasImgurKey);
-        if(removeBgFirstImageBtn) removeBgFirstImageBtn.disabled = !(productImages.length > 0 && hasRemoveBgKey && hasImgurKey);
-        productImages.forEach((imgData, index) => { const imageUrl = imgData.source || imgData; const imageNote = imgData.note || ''; const isErrorPlaceholder = imageUrl.startsWith('placeholder_error_'); const block = document.createElement('div'); block.className = 'image-block'; const thumbDiv = document.createElement('div'); thumbDiv.className = 'image-block-thumbnail'; const thumbImg = document.createElement('img'); thumbImg.alt = `Prévia ${index + 1}`;
-        thumbImg.src = imageUrl.startsWith('http') ? imageUrl : (document.getElementById('app-container') ? "{{ url_for('static', filename='images/placeholder.png') }}" : 'static/images/placeholder.png'); if (isErrorPlaceholder) thumbImg.style.opacity = '0.5'; thumbDiv.appendChild(thumbImg); const infoDiv = document.createElement('div'); infoDiv.className = 'image-block-info'; const urlLink = document.createElement('a'); urlLink.className = 'image-url'; urlLink.href = imageUrl.startsWith('http') ? imageUrl : '#'; urlLink.target = '_blank'; urlLink.textContent = `${index + 1}. ${imageUrl.length > 60 ? imageUrl.substring(0, 28) + '...' + imageUrl.substring(imageUrl.length - 28) : imageUrl}`; const resolutionSpan = document.createElement('span'); resolutionSpan.className = 'image-resolution'; resolutionSpan.textContent = 'Res: ...'; infoDiv.appendChild(urlLink); infoDiv.appendChild(resolutionSpan); if(imageNote){ const noteSpan = document.createElement('span'); noteSpan.className = 'image-source-note' + (isErrorPlaceholder ? ' error' : ''); noteSpan.textContent = imageNote; infoDiv.appendChild(noteSpan); } if (imageUrl.startsWith('http')) { const imgForDims = new Image(); imgForDims.onload = () => { resolutionSpan.textContent = `Res: ${imgForDims.naturalWidth}x${imgForDims.naturalHeight}`; }; imgForDims.onerror = () => { resolutionSpan.textContent = 'Res: Falha'; }; imgForDims.src = imageUrl;} else { resolutionSpan.textContent = 'Res: N/A';} const actionsDiv = document.createElement('div'); actionsDiv.className = 'image-block-actions'; const upBtn = document.createElement('button'); upBtn.className = 'button-secondary btn-icon'; upBtn.innerHTML = '<i class="fas fa-arrow-up"></i>'; upBtn.title = "Mover cima"; upBtn.disabled = index === 0; upBtn.addEventListener('click', () => moveImage(index, -1)); const downBtn = document.createElement('button'); downBtn.className = 'button-secondary btn-icon'; downBtn.innerHTML = '<i class="fas fa-arrow-down"></i>'; downBtn.title = "Mover baixo"; downBtn.disabled = index === productImages.length - 1; downBtn.addEventListener('click', () => moveImage(index, 1)); const removeBtn = document.createElement('button'); removeBtn.className = 'button-secondary btn-icon btn-remove-img'; removeBtn.innerHTML = '<i class="fas fa-trash-alt"></i>'; removeBtn.title = "Remover"; removeBtn.addEventListener('click', () => removeImage(index)); actionsDiv.appendChild(upBtn); actionsDiv.appendChild(downBtn); actionsDiv.appendChild(removeBtn); block.appendChild(thumbDiv); block.appendChild(infoDiv); block.appendChild(actionsDiv); imagePreviewContainer.appendChild(block); });
-        updateRemoveBgCreditsDisplay();
+        if (!imagePreviewContainer) return;
+        imagePreviewContainer.innerHTML = '';
+        if (productImages.length === 0) {
+            imagePreviewContainer.innerHTML = '<p class="text-muted">Nenhuma imagem adicionada.</p>';
+            if(optimizeFirstImageBtn) optimizeFirstImageBtn.disabled = true;
+            if(removeBgFirstImageBtn) removeBgFirstImageBtn.disabled = true;
+            return;
+        }
+
+        const appConfig = JSON.parse(sessionStorage.getItem('appConfigCache') || '{}');
+        const hasImgurKey = !!appConfig.imgur_client_id;
+        const hasRemoveBgKey = !!appConfig.removebg_api_key;
+        if(optimizeFirstImageBtn) optimizeFirstImageBtn.disabled = !hasImgurKey;
+        if(removeBgFirstImageBtn) removeBgFirstImageBtn.disabled = !(hasRemoveBgKey && hasImgurKey);
+
+        productImages.forEach((imageUrl, index) => {
+            const block = document.createElement('div');
+            block.className = 'd-flex align-items-center p-2 border rounded mb-2';
+            block.innerHTML = `
+                <img src="${imageUrl.split('#')[0]}" class="img-thumbnail me-3" style="width: 80px; height: 80px; object-fit: cover;" alt="Thumbnail">
+                <div class="flex-grow-1">
+                    <p class="fw-bold mb-1">${index + 1}.</p>
+                    <p class="mb-1 small text-break text-muted">${imageUrl}</p>
+                </div>
+                <div class="d-flex align-items-center gap-2 ms-3">
+                    <button class="btn btn-light btn-sm text-danger btn-remove-image" title="Remover Imagem"><i class="fas fa-trash-alt"></i></button>
+                    <div class="btn-group-vertical btn-group-sm">
+                        <button type="button" class="btn btn-outline-secondary border-0 btn-move-up" title="Mover para Cima" ${index === 0 ? 'disabled' : ''}><i class="fas fa-arrow-up"></i></button>
+                        <button type="button" class="btn btn-outline-secondary border-0 btn-move-down" title="Mover para Baixo" ${index === productImages.length - 1 ? 'disabled' : ''}><i class="fas fa-arrow-down"></i></button>
+                    </div>
+                </div>
+            `;
+            imagePreviewContainer.appendChild(block);
+        });
     }
-    function addImageToArray(url) { if (!url || !url.startsWith('http')) { if (imageAddStatusEl) {imageAddStatusEl.textContent = 'URL inválida.'; imageAddStatusEl.className = 'status-message error';} return;} if (productImages.length >= 12) { if (imageAddStatusEl) {imageAddStatusEl.textContent = 'Máx 12 imagens.'; imageAddStatusEl.className = 'status-message warning';} return;} productImages.push({ source: url }); renderProductImages(); if (newImageUrlInput) newImageUrlInput.value = ''; if (imageAddStatusEl) {imageAddStatusEl.textContent = 'Imagem adicionada.'; imageAddStatusEl.className = 'status-message success';}}
-    function removeImage(index) { if (index >= 0 && index < productImages.length) {productImages.splice(index, 1); renderProductImages();}}
-    function moveImage(index, direction) { if (index < 0 || index >= productImages.length) return; const newIndex = index + direction; if (newIndex < 0 || newIndex >= productImages.length) return; const item = productImages.splice(index, 1)[0]; productImages.splice(newIndex, 0, item); renderProductImages();}
-    if (addImageUrlBtn) { addImageUrlBtn.addEventListener('click', () => { if (newImageUrlInput) addImageToArray(newImageUrlInput.value.trim()); });}
-    if (newImageUrlInput) { newImageUrlInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); addImageToArray(newImageUrlInput.value.trim());}}); }
+
+    function addImageToArray(url) {
+        if (!url || !url.startsWith('http')) {
+            if (imageAddStatusEl) { imageAddStatusEl.textContent = 'URL inválida.'; imageAddStatusEl.className = 'status-message error'; }
+            return;
+        }
+        if (productImages.length >= 12) {
+            if (imageAddStatusEl) { imageAddStatusEl.textContent = 'Máximo de 12 imagens atingido.'; imageAddStatusEl.className = 'status-message warning'; }
+            return;
+        }
+        productImages.push(url);
+        renderProductImages();
+        if (newImageUrlInput) newImageUrlInput.value = '';
+        if (imageAddStatusEl) { imageAddStatusEl.textContent = 'Imagem adicionada com sucesso.'; imageAddStatusEl.className = 'status-message success'; }
+    }
+
+    if (addImageUrlBtn) {
+        addImageUrlBtn.addEventListener('click', () => {
+            if (newImageUrlInput) addImageToArray(newImageUrlInput.value.trim());
+        });
+    }
+
+    async function processImageAndUpdateUI(apiUrl, processingMessage) {
+        if (productImages.length === 0) {
+            alert("Nenhuma imagem para processar.");
+            return;
+        }
+        const firstImageUrl = productImages[0].split('#')[0]; // Usa a URL limpa
+
+        if(imageAddStatusEl) {
+            imageAddStatusEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${processingMessage}`;
+            imageAddStatusEl.className = 'status-message info';
+        }
+        if(optimizeFirstImageBtn) optimizeFirstImageBtn.disabled = true;
+        if(removeBgFirstImageBtn) removeBgFirstImageBtn.disabled = true;
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ imageUrl: firstImageUrl })
+            });
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error_message || `Erro do servidor: ${response.status}`);
+            }
+
+            productImages.shift(); // Remove a imagem original antiga
+            productImages.unshift(result.newUrl); // Adiciona a nova no início
+            renderProductImages();
+
+            if (imageAddStatusEl) {
+                imageAddStatusEl.textContent = `Imagem processada com sucesso via ${result.service_used}!`;
+                imageAddStatusEl.className = 'status-message success';
+            }
+        } catch (error) {
+            if (imageAddStatusEl) {
+                imageAddStatusEl.textContent = `Erro: ${error.message}`;
+                imageAddStatusEl.className = 'status-message error';
+            }
+        } finally {
+            if(optimizeFirstImageBtn) optimizeFirstImageBtn.disabled = false;
+            if(removeBgFirstImageBtn) removeBgFirstImageBtn.disabled = false;
+        }
+    }
 
     if (optimizeFirstImageBtn) {
-        optimizeFirstImageBtn.addEventListener('click', async () => {
-            if (productImages.length === 0 || !productImages[0].source || !productImages[0].source.startsWith('http')) { alert("Nenhuma imagem válida para otimizar."); return; }
-            const firstImageUrl = productImages[0].source; if (firstImageUrl.includes('_optimized_1000px') || firstImageUrl.includes('_rbg_processed')) { alert("Imagem já processada."); return; }
-            const appConfig = JSON.parse(sessionStorage.getItem('appConfigCache') || '{}'); if (!appConfig.imgur_client_id) { alert("Client ID Imgur N/D."); if(imageAddStatusEl) {imageAddStatusEl.textContent = "Client ID Imgur N/D."; imageAddStatusEl.className = 'status-message error';} return; }
-            if (imageAddStatusEl) { imageAddStatusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Otimizando...'; imageAddStatusEl.className = 'status-message info';} optimizeFirstImageBtn.disabled = true; if(removeBgFirstImageBtn) removeBgFirstImageBtn.disabled = true;
-            try { const response = await fetch('/api/image/optimize', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ imageUrl: firstImageUrl }) }); const result = await response.json(); if (!response.ok) throw new Error(result.error_message || 'Falha otimizar'); productImages[0] = { source: result.newUrl, note: `Otimizada (${result.service_used})` }; if (imageAddStatusEl) { imageAddStatusEl.textContent = '1ª imagem otimizada!'; imageAddStatusEl.className = 'status-message success'; }}
-            catch (error) { if (imageAddStatusEl) { imageAddStatusEl.textContent = `Erro: ${error.message}`; imageAddStatusEl.className = 'status-message error'; }} finally { renderProductImages(); }
+        optimizeFirstImageBtn.addEventListener('click', () => {
+            processImageAndUpdateUI('/api/image/optimize', 'Otimizando primeira imagem...');
         });
     }
+
     if (removeBgFirstImageBtn) {
-        removeBgFirstImageBtn.addEventListener('click', async () => {
-            if (productImages.length === 0 || !productImages[0].source || !productImages[0].source.startsWith('http')) { alert("Nenhuma imagem válida."); return; } const firstImageUrl = productImages[0].source; if (firstImageUrl.includes('_rbg_processed')) { alert("Fundo já removido."); return; }
-            const appConfig = JSON.parse(sessionStorage.getItem('appConfigCache') || '{}'); if (!appConfig.removebg_api_key) { alert("Chave Remove.bg N/D."); if(imageAddStatusEl) {imageAddStatusEl.textContent = "Chave Remove.bg N/D."; imageAddStatusEl.className = 'status-message error';} return; } if (!appConfig.imgur_client_id && !confirm("Client ID Imgur N/D. Continuar sem hospedar?")) { if(imageAddStatusEl) {imageAddStatusEl.textContent = "Cancelado."; imageAddStatusEl.className = 'status-message warning';} return; }
-            if (imageAddStatusEl) { imageAddStatusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Removendo fundo...'; imageAddStatusEl.className = 'status-message info';} if(optimizeFirstImageBtn) optimizeFirstImageBtn.disabled = true; removeBgFirstImageBtn.disabled = true;
-            try { const response = await fetch('/api/image/remove-background', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ imageUrl: firstImageUrl }) }); const result = await response.json(); if (!response.ok && response.status !== 200) { throw new Error(result.error_message || `Falha API (Status: ${response.status})`);} let message = result.message || "Concluído."; let msgType = 'success';
-                if (result.newUrl) { productImages.unshift({ source: result.newUrl, note: `Fundo Removido (${result.service_used})` }); message = `Fundo removido (${result.service_used}).`;}
-                else if (result.error_message && result.service_used === "Local (Falha Upload)") { message = `Processada, mas falha upload: ${result.error_message}`; msgType = 'warning'; productImages.unshift({ source: `placeholder_error_rbg_${Date.now()}.png`, note: `RemoveBG OK, Upload Falhou (${result.credits_charged||0} créd.)` });}
-                else if (result.error_message) { throw new Error(result.error_message); }
-                else if (!result.newUrl && response.ok){ message = "Processado, mas sem nova URL (verif. créditos)."; msgType = 'warning';}
-                if(productImages.length > 12) productImages.pop();
-                if (imageAddStatusEl) { imageAddStatusEl.textContent = message; imageAddStatusEl.className = `status-message ${msgType}`; } if(result.credits_charged !== undefined && result.credits_charged > 0){ setTimeout(loadApiConfigs, 600); }
-            } catch (error) { if (imageAddStatusEl) { imageAddStatusEl.textContent = `Erro: ${error.message}`; imageAddStatusEl.className = 'status-message error'; }}
-            finally { renderProductImages(); }
+        removeBgFirstImageBtn.addEventListener('click', () => {
+            processImageAndUpdateUI('/api/image/remove-background', 'Removendo fundo da primeira imagem...');
         });
     }
-    window.populateImagesFromTiny = function(anexosTiny) { productImages = []; if (anexosTiny && Array.isArray(anexosTiny)) { anexosTiny.forEach(anexo => { if (anexo && anexo.anexo) { if (productImages.length < 12) { productImages.push({ source: anexo.anexo, note: 'Tiny' });}}});} renderProductImages();}
+
+    if (imagePreviewContainer) {
+        imagePreviewContainer.addEventListener('click', (event) => {
+            const block = event.target.closest('.d-flex.align-items-center');
+            if (!block) return;
+            const index = Array.from(imagePreviewContainer.children).indexOf(block);
+
+            if (event.target.closest('.btn-remove-image')) {
+                productImages.splice(index, 1);
+                renderProductImages();
+            }
+            if (event.target.closest('.btn-move-up') && index > 0) {
+                [productImages[index], productImages[index - 1]] = [productImages[index - 1], productImages[index]];
+                renderProductImages();
+            }
+            if (event.target.closest('.btn-move-down') && index < productImages.length - 1) {
+                [productImages[index], productImages[index + 1]] = [productImages[index + 1], productImages[index]];
+                renderProductImages();
+            }
+        });
+    }
+
+    // Função que o seu código de busca no Tiny chama
+    window.populateImagesFromTiny = function(anexosTiny) {
+        productImages = [];
+        if (anexosTiny && Array.isArray(anexosTiny)) {
+            anexosTiny.forEach(anexo => {
+                if (anexo && anexo.anexo) {
+                    if (productImages.length < 12) {
+                        productImages.push(anexo.anexo);
+                    }
+                }
+            });
+        }
+        renderProductImages();
+    }
 
     // =================================================================================
     // --- LÓGICA PARA ABA "FICHA & DESCRIÇÃO" ---
@@ -613,26 +725,130 @@ document.addEventListener('DOMContentLoaded', function () {
         if (valTiny !== null && valTiny !== undefined) { if (inputEl.tagName === 'SELECT') { for (let i = 0; i < inputEl.options.length; i++) { if (inputEl.options[i].textContent.toLowerCase() === String(valTiny).toLowerCase() || inputEl.options[i].value.toLowerCase() === String(valTiny).toLowerCase()) { inputEl.selectedIndex = i; console.log(`  - '${attrML.name}' (SELECT) com '${valTiny}' do Tiny ('${fieldName}')`); break;}}} else { inputEl.value = valTiny; console.log(`  - '${attrML.name}' (INPUT) com '${valTiny}' do Tiny ('${fieldName}')`);}}});
     }
     async function loadMlAttributesForCategory(categoryId) {
-        if (!categoryId) { if (mlAttributesContainer) mlAttributesContainer.innerHTML = '<p>Nenhuma categoria.</p>'; if (attributesStatusEl) attributesStatusEl.textContent = ''; currentMlCategoryIdForAttributes = null; return;}
-        // Removido o if que impedia recarregar se a categoria fosse a mesma, para forçar reaplicação do Tiny
-        // if (currentMlCategoryIdForAttributes === categoryId && mlAttributesContainer && mlAttributesContainer.querySelector('.form-group-attribute')) { if(lastTinyProductDataForAttributes){ const tempAttrs = Array.from(mlAttributesContainer.querySelectorAll('.form-group-attribute input, .form-group-attribute select')).map(inp => ({id: inp.name})); applyTinyDataToMlAttributesUI(lastTinyProductDataForAttributes, tempAttrs); } return; }
-        currentMlCategoryIdForAttributes = categoryId; if (mlAttributesContainer) mlAttributesContainer.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Carregando atributos...</p>'; if (attributesStatusEl) { attributesStatusEl.textContent = 'Carregando...'; attributesStatusEl.className = 'status-message info';}
+        if (!categoryId) {
+            if (mlAttributesContainer) mlAttributesContainer.innerHTML = '<p class="text-muted">Selecione uma categoria na Aba 1.</p>';
+            if (attributesStatusEl) attributesStatusEl.textContent = '';
+            currentMlCategoryIdForAttributes = null;
+            return;
+        }
+        if (currentMlCategoryIdForAttributes === categoryId) return; // Evita recarregar desnecessariamente
+
+        currentMlCategoryIdForAttributes = categoryId;
+        if (mlAttributesContainer) mlAttributesContainer.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Carregando atributos...</p>';
+        if (attributesStatusEl) {
+            attributesStatusEl.textContent = 'Carregando...';
+            attributesStatusEl.className = 'status-message info';
+        }
+
         try {
-            const r = await fetch(`/api/ml/category-attributes/${categoryId}`); const res = await r.json(); if (!r.ok) throw new Error(res.error_message || `Erro ${r.status}`); if (res.error_message && res.attributes === undefined) throw new Error(res.error_message);
-            if (mlAttributesContainer) mlAttributesContainer.innerHTML = ''; let count = 0;
-            if (res.attributes && res.attributes.length > 0) { const common = ['BRAND', 'MODEL', 'PART_NUMBER', 'GTIN', 'LINE', 'ITEM_CONDITION']; const ignore = ["SELLER_SKU"]; const req = []; const opt = []; res.attributes.forEach(attr => { if (ignore.includes(attr.id) || (attr.tags && attr.tags.hidden && !common.includes(attr.id))) return; if (attr.tags && (attr.tags.required || attr.tags.catalog_required || common.includes(attr.id))) req.push(attr); else opt.push(attr);}); req.forEach(attr => { mlAttributesContainer.appendChild(createAttributeInput(attr)); count++;}); if (opt.length > 0) { const sep = document.createElement('hr'); sep.className = 'section-divider'; mlAttributesContainer.appendChild(sep); const title = document.createElement('h4'); title.innerHTML = '<i class="fas fa-sliders-h icon"></i> Opcionais'; title.style.fontSize='1em'; mlAttributesContainer.appendChild(title); opt.forEach(attr => {mlAttributesContainer.appendChild(createAttributeInput(attr)); count++;});} if(attributesStatusEl) {attributesStatusEl.textContent = `${count} atributos.`; attributesStatusEl.className = 'status-message success';} if(lastTinyProductDataForAttributes){applyTinyDataToMlAttributesUI(lastTinyProductDataForAttributes, res.attributes);}}
-            else { if (mlAttributesContainer) mlAttributesContainer.innerHTML = '<p>Nenhum atributo para esta categoria.</p>'; if (attributesStatusEl) {attributesStatusEl.textContent = 'Nenhum atributo.'; attributesStatusEl.className = 'status-message info';}}
-        } catch (error) { if (mlAttributesContainer) mlAttributesContainer.innerHTML = `<p class="error-message">Erro: ${error.message}</p>`; if (attributesStatusEl) {attributesStatusEl.textContent = `Erro: ${error.message}`; attributesStatusEl.className = 'status-message error';}}
+            const response = await fetch(`/api/ml/category-attributes/${categoryId}`);
+            const result = await response.json();
+            if (!response.ok) {
+                // No seu app.py, você retorna uma lista vazia em caso de erro, então o erro vem daqui
+                throw new Error(result.error_message || `Erro ${response.status}`);
+            }
+            const attributes = result; // A resposta é a lista de atributos diretamente
+
+            if (mlAttributesContainer) mlAttributesContainer.innerHTML = '';
+            if (attributes.length > 0) {
+                // A sua lógica de separar obrigatórios e opcionais e renderizá-los
+                const common = ['BRAND', 'MODEL', 'PART_NUMBER', 'GTIN', 'LINE', 'ITEM_CONDITION'];
+                const ignore = ["SELLER_SKU"];
+                const req = [];
+                const opt = [];
+                attributes.forEach(attr => {
+                    if (ignore.includes(attr.id) || (attr.tags && attr.tags.hidden && !common.includes(attr.id))) return;
+                    if (attr.tags && (attr.tags.required || attr.tags.catalog_required || common.includes(attr.id))) {
+                        req.push(attr);
+                    } else {
+                        opt.push(attr);
+                    }
+                });
+
+                req.forEach(attr => mlAttributesContainer.appendChild(createAttributeInput(attr)));
+                if (opt.length > 0) {
+                    mlAttributesContainer.appendChild(document.createElement('hr'));
+                    const title = document.createElement('h6');
+                    title.textContent = 'Opcionais';
+                    mlAttributesContainer.appendChild(title);
+                    opt.forEach(attr => mlAttributesContainer.appendChild(createAttributeInput(attr)));
+                }
+
+                if(attributesStatusEl) {
+                    attributesStatusEl.textContent = `${attributes.length} atributos carregados.`;
+                    attributesStatusEl.className = 'status-message success';
+                }
+                // Aplica dados do Tiny se já tiverem sido carregados
+                if(lastTinyProductDataForAttributes) {
+                    applyTinyDataToMlAttributesUI(lastTinyProductDataForAttributes, attributes);
+                }
+            } else {
+                if (mlAttributesContainer) mlAttributesContainer.innerHTML = '<p>Nenhum atributo encontrado para esta categoria.</p>';
+                if (attributesStatusEl) {
+                    attributesStatusEl.textContent = 'Nenhum atributo.';
+                    attributesStatusEl.className = 'status-message info';
+                }
+            }
+        } catch (error) {
+            if (mlAttributesContainer) mlAttributesContainer.innerHTML = `<p class="error-message">Erro ao carregar atributos: ${error.message}</p>`;
+            if (attributesStatusEl) {
+                attributesStatusEl.textContent = `Erro: ${error.message}`;
+                attributesStatusEl.className = 'status-message error';
+            }
+        }
     }
-    if (generateDescChatGptBtn) { generateDescChatGptBtn.addEventListener('click', async () => {
-        const title = mlTitleInput?.value.trim(); const currentDesc = mlDescriptionTextarea ? mlDescriptionTextarea.value : '';
-        if (!title) { if(descriptionStatusEl) {descriptionStatusEl.textContent = 'Título é necessário.'; descriptionStatusEl.className = 'status-message warning';} return;}
-        const appConfig = JSON.parse(sessionStorage.getItem('appConfigCache') || '{}'); if (!appConfig.chatgpt_api_key) { if(descriptionStatusEl) {descriptionStatusEl.textContent = 'Chave ChatGPT N/D.'; descriptionStatusEl.className = 'status-message error';} return;}
-        if(descriptionStatusEl) {descriptionStatusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando IA...'; descriptionStatusEl.className = 'status-message info';} generateDescChatGptBtn.disabled = true;
-        try { const r = await fetch('/api/ml/generate-description-chatgpt', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ title: title, current_description: currentDesc })}); const res = await r.json(); if (!r.ok) throw new Error(res.error_message || `Erro ${r.status}`); if (res.new_description_html && mlDescriptionTextarea) { mlDescriptionTextarea.value = res.new_description_html; if(descriptionStatusEl) {descriptionStatusEl.textContent = 'Descrição IA inserida!'; descriptionStatusEl.className = 'status-message success';}} else if (res.error_message) { throw new Error(res.error_message); } else { throw new Error('Resposta IA inesperada.');}}
-        catch (error) { if(descriptionStatusEl) {descriptionStatusEl.textContent = `Erro IA: ${error.message}`; descriptionStatusEl.className = 'status-message error';}}
-        finally { generateDescChatGptBtn.disabled = false; }
-    });}
+
+    // "Ouvinte" que reage à seleção de categoria
+    document.addEventListener('categorySelected', (event) => {
+        const { categoryId } = event.detail;
+        loadMlAttributesForCategory(categoryId);
+    });
+
+    if (generateDescChatGptBtn) {
+        generateDescChatGptBtn.addEventListener('click', async () => {
+            const title = mlTitleInput?.value.trim();
+            const currentDesc = mlDescriptionTextarea ? mlDescriptionTextarea.value : '';
+            if (!title) {
+                if(descriptionStatusEl) {
+                    descriptionStatusEl.textContent = 'Título (na Aba 1) é necessário.';
+                    descriptionStatusEl.className = 'status-message warning';
+                }
+                return;
+            }
+            
+            if(descriptionStatusEl) {
+                descriptionStatusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando com IA...';
+                descriptionStatusEl.className = 'status-message info';
+            }
+            generateDescChatGptBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/ml/generate-description-chatgpt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: title, current_description: currentDesc })
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error_message || `Erro ${response.status}`);
+                
+                if (result.new_description_html && mlDescriptionTextarea) {
+                    mlDescriptionTextarea.value = result.new_description_html;
+                    if(descriptionStatusEl) {
+                        descriptionStatusEl.textContent = 'Descrição gerada e inserida!';
+                        descriptionStatusEl.className = 'status-message success';
+                    }
+                }
+            } catch (error) {
+                if(descriptionStatusEl) {
+                    descriptionStatusEl.textContent = `Erro IA: ${error.message}`;
+                    descriptionStatusEl.className = 'status-message error';
+                }
+            } finally {
+                generateDescChatGptBtn.disabled = false;
+            }
+        });
+    }
+
 	
 	
 		
@@ -1135,5 +1351,5 @@ document.addEventListener('DOMContentLoaded', function () {
     loadMLAccounts();
     loadApiConfigs();
     renderProductImages();
-    console.log("Dashboard JS: Finalizado e pronto para uso, incluindo lógica de imagem e ficha/descrição.");
+    console.log("Dashboard JS: Finalizado e pronto para uso, incluindo lógica de imagem e ficha/descrição.");	
 }); // Fim do DOMContentLoaded

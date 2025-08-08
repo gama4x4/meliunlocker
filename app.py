@@ -444,17 +444,23 @@ def api_tiny_product_details_route():
 @app.route('/api/ml/suggest-category', methods=['GET'])
 @login_required
 def api_ml_suggest_category_route():
-    title = request.args.get('title');
-    if not title: return jsonify({"error_message": "Título é obrigatório para sugestão."}), 400
+    title = request.args.get('title')
+    if not title:
+        return jsonify({"error_message": "Título é obrigatório para sugestão."}), 400
     
+    # Pega o token da conta ML ativa na sessão, tentando renová-lo se necessário
     access_token, _, error_token = _get_active_ml_token_from_session_and_refresh()
-    if error_token: return jsonify({"error_message": error_token}), 401
+    if error_token:
+        return jsonify({"error_message": error_token}), 401
     
+    # Chama a função de lógica que acabamos de criar
     result = get_ml_category_suggestion_logic(title, access_token)
-    # result agora pode ter {"error": True, "message": "..."} ou {"error": False, "message": "Nenhuma sugestão..."} ou dados
-    if result.get("error"): # Erro real da nossa lógica ou erro da API ML que não foi 404
+    
+    # Retorna o resultado para o frontend
+    if result.get("error"):
         return jsonify({"error_message": result.get("message")}), 500
-    return jsonify(result) # Envia o resultado, que pode ser a sugestão ou a mensagem de "nenhuma sugestão"
+        
+    return jsonify(result)
 
 @app.route('/api/ml/categories', methods=['GET'])
 @app.route('/api/ml/categories/<category_id>', methods=['GET'])
